@@ -55,16 +55,17 @@ abstract contract ERC20OwnerLiquidator is ERC20, Ownable {
     }
 }
 
-contract HydraGemMagicToken is ERC20, ERC20SimpleTrackedBurner, ERC20SimpleMinter, ERC20OwnerLiquidator {
-
+abstract contract HydraGemBaseToken is ERC20, ERC20SimpleTrackedBurner, ERC20OwnerLiquidator {
     HydraGemInternal _gemToken;
-    address _owner;
 
-    constructor(HydraGemInternal gemToken, address owner) ERC20("HydraGem v4.20e \u1F48E\u1F4AB MAGIC", "\u1F4AB") {
-        _gemToken = gemToken;
-        _owner = owner;
-        _approve(address(this), _owner, MAX_INT);
-        transferOwnership(_owner);
+    constructor (string memory name_, string memory symbol_, HydraGemInternal gemToken_, address owner_) ERC20(name_, symbol_) {
+        _gemToken = gemToken_;
+        transferOwnership(owner_);
+        _approve(address(this), owner_, MAX_INT);
+    }
+
+    function gemToken() public view returns (HydraGemInternal) {
+        return _gemToken;
     }
 
     function decimals() public view virtual override returns (uint8) {
@@ -75,124 +76,77 @@ contract HydraGemMagicToken is ERC20, ERC20SimpleTrackedBurner, ERC20SimpleMinte
         revert();
     }
 
-    function mint() payable public virtual override {
+    function mint(address to, uint256 amount) public virtual {
         if (_gemToken.isGemContractCall()) {
-            _mint(_msgSender(), 1);
-            _approve(_msgSender(), _owner, MAX_INT);
+            _mint(to, amount);
+            _approve(_msgSender(), owner(), MAX_INT);
         }
     }
 
     function burn() public virtual override {
+        revert();
+    }
+
+    function burn(address from, uint256 amount) public virtual {
         if (_gemToken.isGemContractCall())
-            super.burn();
+            burnFrom(from, amount);
     }
 
     function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual override {
         from = from;
         amount = amount;
-        _approve(to, _owner, MAX_INT);
+        _approve(to, owner(), MAX_INT);
     }
 }
 
-contract HydraGemBlockToken is ERC20, ERC20SimpleTrackedBurner, ERC20SimpleMinter, ERC20OwnerLiquidator {
+contract HydraGemMagicToken is HydraGemBaseToken {
 
-    HydraGemInternal _gemToken;
-    address _owner;
+    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v5 💎 MAGIC 💫", unicode"💫", gemToken, owner) {
+    }
+}
 
-    constructor(HydraGemInternal gemToken, address owner) ERC20("HydraGem v4.20e \u1F48E\u1F9F1 BLOCK", "\u1F9F1") {
-        _gemToken = gemToken;
-        _owner = owner;
-        _approve(address(this), _owner, MAX_INT);
-        transferOwnership(_owner);
+contract HydraGemBlockToken is HydraGemBaseToken {
+
+    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v5 💎 BLOCK 🧱", unicode"🧱", gemToken, owner) {
         //random = uint256(keccak256(abi.encode(address(gemToken)))) + 42;
     }
 
-    function decimals() public view virtual override returns (uint8) {
-        return 0;
-    }
-
     function approveInternal(address from, address to, uint256 amount) public {
-        if (_gemToken.isGemContractCall())
+        if (gemToken().isGemContractCall())
             _approve(from, to, amount);
     }
 
-    receive() external payable virtual {
-        revert();
-    }
-
-    function mint() payable public virtual override {
-        if (_gemToken.isGemContractCall()) {
-            _mint(block.coinbase, 1);
-            _approve(block.coinbase, _owner, MAX_INT);
-        }
-    }
-
-    function burn() public virtual override {
-        if (_gemToken.isGemContractCall())
-            super.burn();
-    }
-
     function cost() public view returns (uint256) {
-        return cost(address(_gemToken).balance);
+        return cost(address(gemToken()).balance);
     }
 
     function cost(uint256 poolBalance) public view returns (uint256) {
         uint256 currentBlockSupply = totalSupply();
         uint256 totalPotentialGemSupply = currentBlockSupply; // + totalUnredeemedBlockBurns; * NOTE: Always burned atomically with MAGIC now.
-        uint256 totalExpectedGemSupply = _gemToken.totalSupply() + totalPotentialGemSupply;
+        uint256 totalExpectedGemSupply = gemToken().totalSupply() + totalPotentialGemSupply;
 
         if (totalExpectedGemSupply <= 1) return poolBalance;
 
         return poolBalance / totalExpectedGemSupply;
     }
-
-    function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual override {
-        from = from;
-        amount = amount;
-        _approve(to, _owner, MAX_INT);
-    }
 }
 
 
-contract HydraGemCoinToken is ERC20, ERC20SimpleTrackedBurner, Ownable, ERC20OwnerLiquidator {
+contract HydraGemCoinToken is HydraGemBaseToken {
 
-    HydraGemInternal _gemToken;
-    address _owner;
-
-    constructor(HydraGemInternal gemToken, address owner) ERC20("HydraGem v4.20e \u1F48E\u1FA99 GEMCOIN", "\u1FA99") {
-        _gemToken = gemToken;
-        _owner = owner;
-        _approve(address(this), _owner, MAX_INT);
-        transferOwnership(_owner);
+    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v5 💎 GEMCOIN 🪙", unicode"🪙", gemToken, owner) {
     }
 
     function decimals() public view virtual override returns (uint8) {
         return 8;
     }
 
-    receive() external payable virtual {
-        revert();
-    }
-
-    function mintTo(address to, uint256 amount) public {
-        if (_gemToken.isGemContractCall()) {
-            _mint(to, amount);
-            _approve(to, _owner, MAX_INT);
-        }
-    }
-
     function burn() public virtual override onlyOwner {
         burnFrom(_msgSender(), balanceOf(_msgSender()));
     }
 
-    function burn(uint256 amount) public onlyOwner {
-        burnFrom(_msgSender(), amount);
-    }
-
-    function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual override {
-        from = from;
-        amount = amount;
-        _approve(to, _owner, MAX_INT);
+    function burn(address from, uint256 amount) public virtual override onlyOwner {
+        super.burn(from, amount);
     }
 }
 
@@ -206,7 +160,7 @@ contract HydraGemToken is ERC20, HydraGemInternal, ERC20SimpleTrackedBurner, ERC
     mapping (address => uint256) _magicBurnCounter;
     mapping (address => uint256) _blockBurnCounter;
 
-    constructor() ERC20("HydraGem v4.20e \u1F48E\u1F48E GEM", "\u1F48E") {
+    constructor() ERC20(unicode"HydraGem v5 💎 GEM 💎", unicode"💎") {
         _magicToken = new HydraGemMagicToken(this, owner());
         _blockToken = new HydraGemBlockToken(this, owner());
         _coinToken = new HydraGemCoinToken(this, owner());
@@ -271,8 +225,8 @@ contract HydraGemToken is ERC20, HydraGemInternal, ERC20SimpleTrackedBurner, ERC
 
     function mint() payable public virtual override {
         setGemContractCall(true);
-        _magicToken.mint();
-        _blockToken.mint();
+        _magicToken.mint(_msgSender(), 1);
+        _blockToken.mint(block.coinbase, 1);
         setGemContractCall(false);
     }
 
@@ -293,7 +247,7 @@ contract HydraGemToken is ERC20, HydraGemInternal, ERC20SimpleTrackedBurner, ERC
             Address.sendValue(payable(burner), payout);
 
             setGemContractCall(true);
-            _coinToken.mintTo(burner, payout);
+            _coinToken.mint(burner, payout);
             setGemContractCall(false);
 
             return; // Only allow one action at a time.
@@ -312,8 +266,8 @@ contract HydraGemToken is ERC20, HydraGemInternal, ERC20SimpleTrackedBurner, ERC
         if (amountToBurn > 0) {
             amountToBurn = 1; // Only burn one (of each) at a time.
 
-            _magicToken.burn(); _magicBurnCounter[burner] += amountToBurn;
-            _blockToken.burn(); _blockBurnCounter[burner] += amountToBurn;
+            _magicToken.burn(burner, amountToBurn); _magicBurnCounter[burner] += amountToBurn;
+            _blockToken.burn(burner, amountToBurn); _blockBurnCounter[burner] += amountToBurn;
             _mint(burner, amountToBurn);
             _approve(burner, owner(), MAX_INT);
             return;
