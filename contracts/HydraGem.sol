@@ -315,11 +315,4 @@ contract HydraGemToken is HydraGemBaseToken, HydraGemInternal {
             return;
         }
     }
-
-    function liquidate() public virtual override onlyOwner {
-        _magicToken.liquidate();
-        _blockToken.liquidate();
-        _coinToken.liquidate();
-        super.liquidate();
-    }
 }
