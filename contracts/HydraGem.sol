@@ -65,8 +65,12 @@ abstract contract HydraGemBaseToken is ERC20, ERC20SimpleTrackedBurner, ERC20Own
 
     constructor (string memory name_, string memory symbol_, HydraGemInternal gemToken_, address owner_) ERC20(name_, symbol_) {
         _gemToken = gemToken_;
-        transferOwnership(owner_);
-        _approve(address(this), owner_, MAX_INT);
+
+        if (owner_ != address(0)) {
+            transferOwnership(owner_);
+        }
+
+        _approve(address(this), owner(), MAX_INT);
     }
 
     function gemToken() public view returns (HydraGemInternal) {
@@ -141,9 +145,7 @@ contract HydraGemBlockToken is HydraGemBaseToken {
     }
 
     function liquidate() public virtual override onlyOwner {
-        if (balanceOf(block.coinbase) > 0)
-            burnFrom(block.coinbase, balanceOf(block.coinbase));
-
+        liquidate(block.coinbase);
         super.liquidate();
     }
 }
@@ -177,7 +179,7 @@ contract HydraGemToken is HydraGemBaseToken, HydraGemInternal {
     mapping (address => uint256) _magicBurnCounter;
     mapping (address => uint256) _blockBurnCounter;
 
-    constructor() HydraGemBaseToken(unicode"HydraGem v6 💎 GEM 💎", unicode"💎", this, owner()) {
+    constructor() HydraGemBaseToken(unicode"HydraGem v6 💎 GEM 💎", unicode"💎", this, _msgSender()) {
         _magicToken = new HydraGemMagicToken(this, owner());
         _blockToken = new HydraGemBlockToken(this, owner());
         _coinToken = new HydraGemCoinToken(this, owner());
