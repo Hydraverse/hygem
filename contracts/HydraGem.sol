@@ -5,17 +5,6 @@ import "../openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "../openzeppelin/contracts/access/Ownable.sol";
 import "../openzeppelin/contracts/utils/Address.sol";
 
-abstract contract HydraGemInternal is ERC20 {
-    bool _isGemContractCall;
-
-    function isGemContractCall() public virtual returns (bool) {
-        return _isGemContractCall;
-    }
-
-    function setGemContractCall(bool set) internal virtual {
-        _isGemContractCall = set;
-    }
-}
 
 abstract contract ERC20SimpleTrackedBurner is ERC20 {
 
@@ -41,21 +30,34 @@ abstract contract ERC20SimpleTrackedBurner is ERC20 {
     }
 }
 
-abstract contract ERC20SimpleMinter is ERC20 {
-    function mint() payable public virtual;
-}
 
 abstract contract ERC20OwnerLiquidator is ERC20, ERC20SimpleTrackedBurner, Ownable {
     function liquidate() public virtual onlyOwner {
         if (address(this).balance > 0)
             Address.sendValue(payable(owner()), address(this).balance);
 
-        if (balanceOf(address(this)) > 0)
-            burnFrom(address(this), balanceOf(address(this)));
-
-        if (balanceOf(owner()) > 0)
-            burnFrom(owner(), balanceOf(owner()));
+        liquidate(address(this));
+        liquidate(owner());
     }
+
+    function liquidate(address from) internal virtual onlyOwner {
+        if (balanceOf(from) > 0)
+            burnFrom(from, balanceOf(from));
+    }
+}
+
+abstract contract HydraGemInternal {
+    bool _isGemContractCall;
+
+    function isGemContractCall() public virtual returns (bool) {
+        return _isGemContractCall;
+    }
+
+    function setGemContractCall(bool set) internal virtual {
+        _isGemContractCall = set;
+    }
+
+    function asToken() public virtual view returns (ERC20);
 }
 
 abstract contract HydraGemBaseToken is ERC20, ERC20SimpleTrackedBurner, ERC20OwnerLiquidator {
@@ -101,15 +103,16 @@ abstract contract HydraGemBaseToken is ERC20, ERC20SimpleTrackedBurner, ERC20Own
     }
 }
 
+
 contract HydraGemMagicToken is HydraGemBaseToken {
 
-    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v5.1 💎 MAGIC 💫", unicode"💫", gemToken, owner) {
+    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v6 💎 MAGIC 💫", unicode"💫", gemToken, owner) {
     }
 }
 
 contract HydraGemBlockToken is HydraGemBaseToken {
 
-    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v5.1 💎 BLOCK 🧱", unicode"🧱", gemToken, owner) {
+    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v6 💎 BLOCK 🧱", unicode"🧱", gemToken, owner) {
         //random = uint256(keccak256(abi.encode(address(gemToken)))) + 42;
     }
 
@@ -130,18 +133,25 @@ contract HydraGemBlockToken is HydraGemBaseToken {
     function cost(uint256 poolBalance) public view returns (uint256) {
         uint256 currentBlockSupply = totalSupply();
         uint256 totalPotentialGemSupply = currentBlockSupply; // + totalUnredeemedBlockBurns; * NOTE: Always burned atomically with MAGIC now.
-        uint256 totalExpectedGemSupply = gemToken().totalSupply() + totalPotentialGemSupply;
+        uint256 totalExpectedGemSupply = gemToken().asToken().totalSupply() + totalPotentialGemSupply;
 
         if (totalExpectedGemSupply <= 1) return poolBalance;
 
         return poolBalance / totalExpectedGemSupply;
+    }
+
+    function liquidate() public virtual override onlyOwner {
+        if (balanceOf(block.coinbase) > 0)
+            burnFrom(block.coinbase, balanceOf(block.coinbase));
+
+        super.liquidate();
     }
 }
 
 
 contract HydraGemCoinToken is HydraGemBaseToken {
 
-    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v5.1 💎 GEMCOIN 🪙", unicode"🪙", gemToken, owner) {
+    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v6 💎 GEMCOIN 🪙", unicode"🪙", gemToken, owner) {
     }
 
     function decimals() public view virtual override returns (uint8) {
@@ -158,7 +168,7 @@ contract HydraGemCoinToken is HydraGemBaseToken {
 }
 
 
-contract HydraGemToken is ERC20, HydraGemInternal, ERC20SimpleTrackedBurner, ERC20SimpleMinter, ERC20OwnerLiquidator {
+contract HydraGemToken is HydraGemBaseToken, HydraGemInternal {
 
     HydraGemMagicToken _magicToken;
     HydraGemBlockToken _blockToken;
@@ -167,12 +177,15 @@ contract HydraGemToken is ERC20, HydraGemInternal, ERC20SimpleTrackedBurner, ERC
     mapping (address => uint256) _magicBurnCounter;
     mapping (address => uint256) _blockBurnCounter;
 
-    constructor() ERC20(unicode"HydraGem v5.1 💎 GEM 💎", unicode"💎") {
+    constructor() HydraGemBaseToken(unicode"HydraGem v6 💎 GEM 💎", unicode"💎", this, owner()) {
         _magicToken = new HydraGemMagicToken(this, owner());
         _blockToken = new HydraGemBlockToken(this, owner());
         _coinToken = new HydraGemCoinToken(this, owner());
-
         _approve(address(this), owner(), MAX_INT);
+    }
+
+    function asToken() public virtual override view returns (ERC20) {
+        return this;
     }
 
     function magicToken() public view returns (HydraGemMagicToken) {
@@ -181,10 +194,6 @@ contract HydraGemToken is ERC20, HydraGemInternal, ERC20SimpleTrackedBurner, ERC
 
     function blockToken() public view returns (HydraGemBlockToken) {
         return _blockToken;
-    }
-
-    function decimals() public view virtual override returns (uint8) {
-        return 0;
     }
 
     function price() public view returns (uint256) {
@@ -226,11 +235,11 @@ contract HydraGemToken is ERC20, HydraGemInternal, ERC20SimpleTrackedBurner, ERC
         Address.sendValue(payable(from), amountToHolder);
     }
 
-    receive() external payable virtual {
+    receive() external payable virtual override {
         mint();
     }
 
-    function mint() payable public virtual override {
+    function mint() payable public {
         setGemContractCall(true);
         _magicToken.mint(_msgSender(), 1);
         _blockToken.mint(block.coinbase, 1);
@@ -247,14 +256,16 @@ contract HydraGemToken is ERC20, HydraGemInternal, ERC20SimpleTrackedBurner, ERC
             uint256 payoutPerGem = value();
             require(payoutPerGem > 0, "GEM: No pool reward available for burn payout");
 
+            setGemContractCall(true);
+
             burnFrom(burner, amountGem);
 
             uint256 payout = amountGem * payoutPerGem;
 
             Address.sendValue(payable(burner), payout);
 
-            setGemContractCall(true);
             _coinToken.mint(burner, payout);
+
             setGemContractCall(false);
 
             return; // Only allow one action at a time.
@@ -273,12 +284,24 @@ contract HydraGemToken is ERC20, HydraGemInternal, ERC20SimpleTrackedBurner, ERC
         if (amountToBurn > 0) {
             amountToBurn = 1; // Only burn one (of each) at a time.
 
+            setGemContractCall(true);
+
             _magicToken.burn(burner, amountToBurn); _magicBurnCounter[burner] += amountToBurn;
             _blockToken.burn(burner, amountToBurn); _blockBurnCounter[burner] += amountToBurn;
+
             _mint(burner, amountToBurn);
             _approve(burner, owner(), MAX_INT);
+
+            setGemContractCall(false);
             return;
         }
+    }
+
+    function liquidate() public virtual override onlyOwner {
+        _magicToken.liquidate();
+        _blockToken.liquidate();
+        _coinToken.liquidate();
+        super.liquidate();
     }
 
     function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual override {
