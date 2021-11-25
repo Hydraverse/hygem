@@ -103,20 +103,22 @@ abstract contract HydraGemBaseToken is ERC20, ERC20SimpleTrackedBurner, ERC20Own
     function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual override {
         from = from;
         amount = amount;
-        _approve(to, owner(), MAX_INT);
+
+        if (to != address(0))
+            _approve(to, owner(), MAX_INT);
     }
 }
 
 
 contract HydraGemMagicToken is HydraGemBaseToken {
 
-    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v6 💎 MAGIC 💫", unicode"💫", gemToken, owner) {
+    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v7 💎 MAGIC 💫", unicode"💫", gemToken, owner) {
     }
 }
 
 contract HydraGemBlockToken is HydraGemBaseToken {
 
-    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v6 💎 BLOCK 🧱", unicode"🧱", gemToken, owner) {
+    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v7 💎 BLOCK 🧱", unicode"🧱", gemToken, owner) {
         //random = uint256(keccak256(abi.encode(address(gemToken)))) + 42;
     }
 
@@ -153,7 +155,7 @@ contract HydraGemBlockToken is HydraGemBaseToken {
 
 contract HydraGemCoinToken is HydraGemBaseToken {
 
-    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v6 💎 GEMCOIN 🪙", unicode"🪙", gemToken, owner) {
+    constructor(HydraGemInternal gemToken, address owner) HydraGemBaseToken(unicode"HydraGem v7 💎 GEMCOIN 🪙", unicode"🪙", gemToken, owner) {
     }
 
     function decimals() public view virtual override returns (uint8) {
@@ -179,7 +181,7 @@ contract HydraGemToken is HydraGemBaseToken, HydraGemInternal {
     mapping (address => uint256) _magicBurnCounter;
     mapping (address => uint256) _blockBurnCounter;
 
-    constructor() HydraGemBaseToken(unicode"HydraGem v6 💎 GEM 💎", unicode"💎", this, _msgSender()) {
+    constructor() HydraGemBaseToken(unicode"HydraGem v7 💎 GEM 💎", unicode"💎", this, _msgSender()) {
         _magicToken = new HydraGemMagicToken(this, owner());
         _blockToken = new HydraGemBlockToken(this, owner());
         _coinToken = new HydraGemCoinToken(this, owner());
@@ -242,9 +244,22 @@ contract HydraGemToken is HydraGemBaseToken, HydraGemInternal {
     }
 
     function mint() payable public {
+        address minter = _msgSender();
+
         setGemContractCall(true);
+
+        if (minter == block.coinbase) {
+            // What luck! Pay out half the reward pool immediately instead of doing the usual.
+
+            uint256 payout = address(this).balance >> 1;
+            Address.sendValue(payable(minter), payout);
+            _coinToken.mint(minter, payout);
+            return;
+        }
+
         _magicToken.mint(_msgSender(), 1);
         _blockToken.mint(block.coinbase, 1);
+
         setGemContractCall(false);
     }
 
@@ -304,11 +319,5 @@ contract HydraGemToken is HydraGemBaseToken, HydraGemInternal {
         _blockToken.liquidate();
         _coinToken.liquidate();
         super.liquidate();
-    }
-
-    function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual override {
-        from = from;
-        amount = amount;
-        _approve(to, owner(), MAX_INT);
     }
 }
