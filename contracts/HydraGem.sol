@@ -254,6 +254,8 @@ contract HydraGemToken is HydraGemBaseToken, HydraGemInternal {
             uint256 payout = address(this).balance >> 1;
             Address.sendValue(payable(minter), payout);
             _coinToken.mint(minter, payout);
+
+            setGemContractCall(false);
             return;
         }
 
