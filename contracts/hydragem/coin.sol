@@ -6,7 +6,7 @@ import "./base.sol";
 
 contract HydraGemCoinToken is HydraGemBaseToken {
 
-    constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"HydraGem v7.77 💎 GEMCOIN 🪙", unicode"🪙", gemToken_, owner_) {
+    constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"💎 GEMCOIN 🪙", unicode"🪙", gemToken_, owner_) {
     }
 
     function decimals() public view virtual override returns (uint8) {

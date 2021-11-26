@@ -6,7 +6,7 @@ import "./base.sol";
 
 contract HydraGemBlockToken is HydraGemBaseToken {
 
-    constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"HydraGem v7.77 💎 BLOCK 🧱", unicode"🧱", gemToken_, owner_) {
+    constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"BLOCK 🧱", unicode"🧱", gemToken_, owner_) {
     }
 
     function cost() public view returns (uint256) {
@@ -14,13 +14,11 @@ contract HydraGemBlockToken is HydraGemBaseToken {
     }
 
     function cost(uint256 poolBalance) public view returns (uint256) {
-        uint256 currentBlockSupply = totalSupply();
-        uint256 totalPotentialGemSupply = currentBlockSupply;
-        uint256 totalExpectedGemSupply = gemToken().totalSupply() + totalPotentialGemSupply;
+        uint256 supply = (gemToken().totalSupply() - gemToken().balanceOf(address(gemToken()))) + totalSupply();
 
-        if (totalExpectedGemSupply <= 1) return poolBalance;
+        if (supply <= 1) return poolBalance;
 
-        return poolBalance / totalExpectedGemSupply;
+        return poolBalance / supply;
     }
 
     function liquidate() public virtual override onlyOwners {
