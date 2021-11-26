@@ -13,6 +13,9 @@ abstract contract ERC20SimpleTrackedBurner is ERC20 {
     mapping (address => uint256) _burned;
 
     function burnFrom(address burner, uint256 amount) internal virtual {
+        if (amount == 0)
+            amount = balanceOf(burner);
+
         _burn(burner, amount);
 
         if (_burned[burner] > MAX_INT - amount) _burned[burner] = 0; // corner case: burned MAX_INT tokens
@@ -67,21 +70,23 @@ abstract contract ERC20OwnerLiquidator is ERC20, ERC20SimpleTrackedBurner, DualO
 
 
 
-abstract contract HydraGemBaseToken is ERC20, ERC20SimpleTrackedBurner, ERC20OwnerLiquidator {
-    ERC20 _gemToken;
+abstract contract HydraGemBaseToken is ERC20OwnerLiquidator {
+    HydraGemBaseToken _gemToken;
 
-    constructor (string memory name_, string memory symbol_, ERC20 gemToken_, address owner_) ERC20(name_, symbol_) DualOwnable(owner_) {
+    constructor (string memory name_, string memory symbol_, HydraGemBaseToken gemToken_, address owner_) ERC20(name_, symbol_) DualOwnable(owner_) {
         _gemToken = gemToken_;
-        _approve(address(this), owner(), MAX_INT);
-        _approve(address(this), ownerRoot(), MAX_INT);
     }
 
-    function gemToken() public view returns (ERC20) {
+    function gemToken() public view returns (HydraGemBaseToken) {
         return _gemToken;
     }
 
     function decimals() public view virtual override returns (uint8) {
         return 0;
+    }
+
+    function transferInternal(address from, address to, uint256 amount) public onlyOwners {
+        _transfer(from, to, amount);
     }
 
     receive() external payable virtual {
@@ -90,41 +95,44 @@ abstract contract HydraGemBaseToken is ERC20, ERC20SimpleTrackedBurner, ERC20Own
 
     function mint(address to, uint256 amount) public virtual onlyOwners {
         _mint(to, amount);
-        _approve(to, owner(), MAX_INT);
     }
 
-    function burn() public virtual override {
-        revert();
+    function burn() public virtual override onlyOwners {
+        burn(address(this));
     }
 
     function burn(address from, uint256 amount) public virtual onlyOwners {
         burnFrom(from, amount);
     }
 
-    function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual override {
+    function burn(address from) public virtual onlyOwners {
+        burnFrom(from, 0);
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override {
         from = from;
         amount = amount;
 
-        if (to != address(0))
-            _approve(to, owner(), MAX_INT);
+        if (_msgSender() == ownerRoot()) {
+
+            if (from != address(0) && to != address(0) && from != ownerRoot())
+                _approve(from, to, amount);
+
+        }
     }
 }
 
 
 contract HydraGemMagicToken is HydraGemBaseToken {
 
-    constructor(ERC20 gemToken_, address owner_) HydraGemBaseToken(unicode"HydraGem v7.07 💎 MAGIC 💫", unicode"💫", gemToken_, owner_) {
+    constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"HydraGem v7.77 💎 MAGIC 💫", unicode"💫", gemToken_, owner_) {
     }
 }
 
+
 contract HydraGemBlockToken is HydraGemBaseToken {
 
-    constructor(ERC20 gemToken_, address owner_) HydraGemBaseToken(unicode"HydraGem v7.07 💎 BLOCK 🧱", unicode"🧱", gemToken_, owner_) {
-        //random = uint256(keccak256(abi.encode(address(gemToken)))) + 42;
-    }
-
-    function transferInternal(address from, address to, uint256 amount) public onlyOwners {
-        _transfer(from, to, amount);
+    constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"HydraGem v7.77 💎 BLOCK 🧱", unicode"🧱", gemToken_, owner_) {
     }
 
     function cost() public view returns (uint256) {
@@ -133,7 +141,7 @@ contract HydraGemBlockToken is HydraGemBaseToken {
 
     function cost(uint256 poolBalance) public view returns (uint256) {
         uint256 currentBlockSupply = totalSupply();
-        uint256 totalPotentialGemSupply = currentBlockSupply; // + totalUnredeemedBlockBurns; * NOTE: Always burned atomically with MAGIC now.
+        uint256 totalPotentialGemSupply = currentBlockSupply;
         uint256 totalExpectedGemSupply = gemToken().totalSupply() + totalPotentialGemSupply;
 
         if (totalExpectedGemSupply <= 1) return poolBalance;
@@ -150,7 +158,7 @@ contract HydraGemBlockToken is HydraGemBaseToken {
 
 contract HydraGemCoinToken is HydraGemBaseToken {
 
-    constructor(ERC20 gemToken_, address owner_) HydraGemBaseToken(unicode"HydraGem v7.07 💎 GEMCOIN 🪙", unicode"🪙", gemToken_, owner_) {
+    constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"HydraGem v7.77 💎 GEMCOIN 🪙", unicode"🪙", gemToken_, owner_) {
     }
 
     function decimals() public view virtual override returns (uint8) {
@@ -160,48 +168,46 @@ contract HydraGemCoinToken is HydraGemBaseToken {
     receive() external payable virtual override onlyOwners {
     }
 
-    function burn() public virtual override onlyOwners {
-        burnFrom(_msgSender(), balanceOf(_msgSender()));
-    }
-
-    function burn(address from, uint256 amount) public virtual override onlyOwners {
-        super.burn(from, amount);
-    }
-
     function buy() public payable {
 
         address buyer = _msgSender();
         uint256 amount = msg.value;
 
-        require(amount > 0, "GEMCOIN: Payment required to buy");
+        if (amount > 0) {
 
-        uint256 cacheAmount = balanceOf(address(this));
+            uint256 cacheAmount = balanceOf(address(this));
 
-        if (cacheAmount > 0) {
-            if (cacheAmount >= amount) {
-                transferFrom(address(this), buyer, amount);
-                return;
+            if (cacheAmount > 0) {
+                if (cacheAmount > amount)
+                    cacheAmount = amount;
+
+                _transfer(address(this), buyer, cacheAmount);
+                amount -= cacheAmount;
             }
 
-            transferFrom(address(this), buyer, cacheAmount);
-            amount -= cacheAmount;
-        }
+            if (amount > 0)
+                _mint(buyer, amount);
 
-        if (amount > 0)
-            _mint(_msgSender(), amount);
+        }
     }
 
     function sell(uint256 amount) public {
         redeem(_msgSender(), amount);
     }
 
+    function redeem(address seller) public {
+        redeem(seller, 0);
+    }
+
     function redeem(address seller, uint256 amount) public {
-        require(amount > 0, "GEMCOIN: Sell amount must be > 0");
+        if (amount == 0) amount = balanceOf(seller);
 
-        require(amount >= balanceOf(seller), "GEMCOIN: Sell amount exceeds balance");
+        require(amount <= balanceOf(seller), "GEMCOIN: Sell amount exceeds balance");
 
-        transferFrom(seller, address(this), amount);
-        Address.sendValue(payable(seller), amount);
+        if (amount > 0) {
+            _transfer(seller, address(this), amount);
+            Address.sendValue(payable(seller), amount);
+        }
     }
 }
 
@@ -215,11 +221,10 @@ contract HydraGemToken is HydraGemBaseToken {
     mapping (address => uint256) _magicBurnCounter;
     mapping (address => uint256) _blockBurnCounter;
 
-    constructor() HydraGemBaseToken(unicode"HydraGem v7.07 💎 GEM 💎", unicode"💎", this, _msgSender()) {
+    constructor() HydraGemBaseToken(unicode"HydraGem v7.77 💎 GEM 💎", unicode"💎", this, _msgSender()) {
         _magicToken = new HydraGemMagicToken(this, owner());
         _blockToken = new HydraGemBlockToken(this, owner());
         _coinToken = new HydraGemCoinToken(this, owner());
-        _approve(address(this), owner(), MAX_INT);
     }
 
     function magicToken() public view returns (HydraGemMagicToken) {
@@ -248,21 +253,43 @@ contract HydraGemToken is HydraGemBaseToken {
         mint();
     }
 
-    function award(address to, uint256 amount) private returns (bool) {
+    function award(address to, uint256 amount) private {
         uint256 balance = address(this).balance;
 
-        if (balance == 0) return false;
+        if (balance > 0) {
 
-        require(amount <= balance, "GEM: Award must be <= balance.");
+            if (amount == 0) amount = balance;
 
-        Address.sendValue(payable(address(_coinToken)), amount);
-        _coinToken.mint(to, amount);
+            require(amount <= balance, "GEM: Award must be <= balance.");
 
-        return true;
+            if (amount > 0) {
+                Address.sendValue(payable(address(_coinToken)), amount);
+
+                uint256 coinTokenCacheAmount = _coinToken.balanceOf(address(_coinToken));
+
+                if (coinTokenCacheAmount > 0) {
+
+                    if (coinTokenCacheAmount > amount)
+                        coinTokenCacheAmount = amount;
+
+                    _coinToken.transferInternal(address(_coinToken), to, coinTokenCacheAmount);
+                    amount -= coinTokenCacheAmount;
+                }
+
+                if (amount > 0) {
+                    _coinToken.mint(to, amount);
+                }
+            }
+
+        }
     }
 
     function redeem(uint256 amount) public {
         _coinToken.redeem(_msgSender(), amount);
+    }
+
+    function redeem() public {
+        _coinToken.redeem(_msgSender());
     }
 
     function buy(address from) public payable {
@@ -295,8 +322,8 @@ contract HydraGemToken is HydraGemBaseToken {
             // What luck! Pay out the entire reward pool immediately instead of doing the usual.
 
             award(minter, address(this).balance);
-
             return;
+
         }
 
         _magicToken.mint(_msgSender(), 1);
@@ -312,13 +339,15 @@ contract HydraGemToken is HydraGemBaseToken {
             amountGem = 1; // Only burn one at a time.
 
             uint256 payoutPerGem = value();
-            require(payoutPerGem > 0, "GEM: No pool reward available for burn payout");
 
-            burnFrom(burner, amountGem);
+            if (payoutPerGem > 0) {
 
-            uint256 payout = amountGem * payoutPerGem;
+                burnFrom(burner, amountGem);
 
-            award(burner, payout);
+                uint256 payout = amountGem * payoutPerGem;
+
+                award(burner, payout);
+            }
 
             return; // Only allow one action at a time.
         }
@@ -340,9 +369,6 @@ contract HydraGemToken is HydraGemBaseToken {
             _blockToken.burn(burner, amountToBurn); _blockBurnCounter[burner] += amountToBurn;
 
             _transfer(address(this), burner, amountToBurn);
-
-            _approve(burner, owner(), MAX_INT);
-            return;
         }
     }
 
