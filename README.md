@@ -8,7 +8,7 @@ An immediate HYDRA "cash" prize awaits those lucky enough to mine blocks when mi
 
 Additionally, all block miners get an opportunity to redeem the proportional gem burning reward, every time magic is minted, and from anywhere!
 
-# Function Map
+# Usage
 
 Use `sendtocontract` to access all below functions, and `callcontract` for views.
 
@@ -27,23 +27,11 @@ $ hydra-cli -testnet callcontract 919ed2d23fa2b88374c6b78a22d3e54648a42cc0 a035b
 {
   "address": "919ed2d23fa2b88374c6b78a22d3e54648a42cc0",
   "executionResult": {
-    "gasUsed": 25567,
-    "excepted": "None",
-    "newAddress": "919ed2d23fa2b88374c6b78a22d3e54648a42cc0",
+    ...
     "output": "0000000000000000000000000000000000000000000000000000000008be7c4d",
-    "codeDeposit": 0,
-    "gasRefunded": 0,
-    "depositSize": 0,
-    "gasForDeposit": 0,
-    "exceptedMessage": ""
+    ...
   },
-  "transactionReceipt": {
-    "stateRoot": "eedcbb96f774b799c51134c74ef3305a2426a0f5d1100f4ce02d79a65004e0f6",
-    "gasUsed": 25567,
-    "bloom": "...",
-    "log": [
-    ]
-  }
+  ...
 }
 
 $ python3 -c 'print(0x8be7c4d / 10**8)'
@@ -89,7 +77,8 @@ print(format_call(call, addr_from, addr_to, amount))
 
 This functionality is also available using `call.py`, and includes a map of function names.
 
-```shell
+
+```
 halo@blade:halos ֍ ./call.py -h
 usage: call.py [-h] [-V] [-l] CALL [PARAM [PARAM ...]]
 
@@ -127,7 +116,11 @@ halo@blade:halos ֍ ./call.py -l
 halo@blade:halos ֍ ./call.py "buy(address)" ecfdca6aced679c041241de8d12a90779f3dc71a
 f088d547000000000000000000000000ecfdca6aced679c041241de8d12a90779f3dc71a
 
+halo@blade:halos ֍ ./call.py burn
+44df8e70
 ```
+
+# Function Details
 
 ### Main Contract
 
