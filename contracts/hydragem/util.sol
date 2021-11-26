@@ -8,8 +8,6 @@ import "../../openzeppelin/contracts/utils/Address.sol";
 
 abstract contract ERC20SimpleTrackedBurner is ERC20 {
 
-    uint256 MAX_INT = 2**256 - 1;
-
     mapping (address => uint256) _burned;
 
     function burnFrom(address burner, uint256 amount) internal virtual {
@@ -17,10 +15,6 @@ abstract contract ERC20SimpleTrackedBurner is ERC20 {
             amount = balanceOf(burner);
 
         _burn(burner, amount);
-
-        if ((_burned[burner] - amount) > (MAX_INT - amount))
-            _burned[burner] = 0; // corner case: burned MAX_INT tokens
-
         _burned[burner] += amount;
     }
 
