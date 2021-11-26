@@ -21,7 +21,7 @@ contract HydraGemToken is HydraGemBaseToken {
         _magicToken = new HydraGemMagicToken(this, owner());
         _blockToken = new HydraGemBlockToken(this, owner());
         _coinToken = new HydraGemCoinToken(this, owner());
-        _mintCost = 0.0001 ether;
+        _mintCost = 10 ** _coinToken.decimals() / 10000;
     }
 
     function magicToken() public view returns (HydraGemMagicToken) {
