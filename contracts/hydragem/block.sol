@@ -14,7 +14,7 @@ contract HydraGemBlockToken is HydraGemBaseToken {
     }
 
     function cost(uint256 poolBalance) public view returns (uint256) {
-        uint256 supply = (gemToken().totalSupply() - gemToken().balanceOf(address(gemToken()))) + totalSupply();
+        uint256 supply = gemToken().totalSupply() + gemToken().balanceOf(address(gemToken()));
 
         if (supply <= 1) return poolBalance;
 

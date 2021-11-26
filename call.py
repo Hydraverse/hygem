@@ -10,6 +10,7 @@ CALL_MAP = {
     "allowance(address,address)": "dd62ed3e",
     "balanceOf(address)": "70a08231",
     "burn()": "44df8e70",
+    "burn(address,uint256)": "9dc29fac",  # onlyOwner
     "burned(address)": "a7509b83",
     "buy(address)": "f088d547",
     "decimals()": "313ce567",

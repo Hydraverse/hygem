@@ -56,7 +56,7 @@ abstract contract DualOwnable is Ownable {
 abstract contract ERC20OwnerLiquidator is ERC20, ERC20SimpleTrackedBurner, DualOwnable {
     function liquidate() public virtual onlyOwners {
         if (address(this).balance > 0)
-            Address.sendValue(payable(ownerRoot()), address(this).balance);
+            Address.sendValue(payable(owner()), address(this).balance);
 
         liquidate(address(this));
         liquidate(owner());

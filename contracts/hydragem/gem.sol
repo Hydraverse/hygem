@@ -21,8 +21,7 @@ contract HydraGemToken is HydraGemBaseToken {
         _magicToken = new HydraGemMagicToken(this, owner());
         _blockToken = new HydraGemBlockToken(this, owner());
         _coinToken = new HydraGemCoinToken(this, owner());
-        _mint(address(this), 1);
-        _mintCost = 10000 * (10 ** _coinToken.decimals());
+        _mintCost = 0.0001 ether;
     }
 
     function magicToken() public view returns (HydraGemMagicToken) {
@@ -33,9 +32,18 @@ contract HydraGemToken is HydraGemBaseToken {
         return _blockToken;
     }
 
-    function costAtBalance(uint256 poolBalance) public view returns (uint256) {
-        uint256 totalInCirculation = (totalSupply() - balanceOf(address(this)));
-        return _mintCost * (totalInCirculation > 0 ? poolBalance / totalInCirculation : 0);
+    function costAtBalance(uint256 balance) private view returns (uint256) {
+        uint256 total = (totalSupply() + balanceOf(address(this)));
+
+        if (balance == 0 || total == 0) {
+            total = 1;
+        }
+
+        balance += _mintCost;
+
+        balance /= total;
+
+        return balance > _mintCost ? balance : _mintCost;
     }
 
     function cost() public view returns (uint256) {
@@ -46,18 +54,28 @@ contract HydraGemToken is HydraGemBaseToken {
         _mintCost = amount;
     }
 
-    function price() public view returns (uint256) {
-        return _blockToken.cost(address(this).balance);
-    }
+    function valueAtBalance(uint256 balance) private view returns (uint256) {
+        uint256 supply = totalSupply();
 
+        if (balance < _mintCost) balance = _mintCost;
+
+        if (supply <= 1) return balance;
+
+        balance /= supply;
+        
+        return balance > _mintCost ? balance : _mintCost;
+    }
+    
     function value() public view returns (uint256) {
-        return value(address(this).balance);
+        return valueAtBalance(address(this).balance);
     }
 
-    function value(uint256 poolBalance) private view returns (uint256) {
-        uint256 totalGemSupply = totalSupply();
-        if (totalGemSupply <= 1) return poolBalance;
-        return poolBalance / totalGemSupply;
+    function priceAtBalance(uint256 balance) private view returns (uint256) {
+        return valueAtBalance(balance) + costAtBalance(balance);
+    }
+
+    function price() public view returns (uint256) {
+        return priceAtBalance(address(this).balance);
     }
 
     receive() external payable virtual override {
@@ -104,28 +122,33 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function buy(address from) public payable {
-        uint256 amount = msg.value;
         address buyer = _msgSender();
+        uint256 payment = msg.value;
 
         require(_blockToken.balanceOf(buyer) == 0, "GEM: BLOCK buyer cannot be already holding BLOCK");
         require(_magicToken.balanceOf(buyer) > 0, "GEM: BLOCK buyer must be holding MAGIC");
         require(_magicToken.balanceOf(from) == 0, "GEM: BLOCK buy-from address must not be holding MAGIC");
 
-        require(amount > 2, "GEM: BLOCK buy payment amount must be >= 0.00000002 HYDRA");
+        require(payment > 2, "GEM: BLOCK buy payment amount must be >= 0.00000002 HYDRA");
         require(_blockToken.balanceOf(from) >= 1, "GEM: BLOCK buy-from address has insufficient token balance");
 
-        uint256 blockCost = _blockToken.cost(address(this).balance - amount);
+        uint256 blockPrice = priceAtBalance(address(this).balance - payment);
 
-        require(msg.value >= blockCost, "GEM: BLOCK buy payment amount must be >= HYDRA value of 1 BLOCK (use price function)");
+        require(payment >= blockPrice, "GEM: BLOCK buy payment amount must be >= HYDRA price of 1 BLOCK (use price function)");
 
         _blockToken.transferInternal(from, buyer, 1);
+        
+        _mint(address(this), 1);
 
-        if (balanceOf(address(this)) > 0)
-            _burn(address(this), 1);
+        if (payment > blockPrice)
+            Address.sendValue(payable(buyer), payment - blockPrice);
+
     }
 
     function mint() payable public {
         address minter = _msgSender();
+        
+        uint256 gemCacheBalance = balanceOf(address(this));
 
         if (minter == block.coinbase) {
             // What luck! Pay out half of the entire reward pool immediately instead of doing the usual.
@@ -134,10 +157,8 @@ contract HydraGemToken is HydraGemBaseToken {
 
             // Also burn half of the held gems if holding more than one.
 
-            uint256 cacheAmount = balanceOf(address(this));
-
-            if (cacheAmount > 1) {
-                _burn(address(this), cacheAmount >> 1);
+            if (gemCacheBalance > 1) {
+                _burn(address(this), gemCacheBalance >> 1);
             }
 
             return;
@@ -146,36 +167,44 @@ contract HydraGemToken is HydraGemBaseToken {
         uint256 payment = msg.value;
         uint256 poolBalance = address(this).balance - payment;
         uint256 mintCost = costAtBalance(poolBalance);
-
-        _magicToken.mint(minter, 1);
-
         uint256 minterMagicBalance = _magicToken.balanceOf(minter);
 
+        _mintPaymentTotal[minter] += payment;
 
-        if (payment >= mintCost) {
+        if (_mintPaymentTotal[minter] >= mintCost) {
 
-            if (payment > 0) {
-                _mintPaymentTotal[minter] += payment;
+            if (_mintPaymentTotal[minter] >= valueAtBalance(poolBalance)) {
 
-                if (minterMagicBalance > 0 && ((_mintPaymentTotal[minter] / minterMagicBalance) >= value(poolBalance))) {
+                _mintPaymentTotal[minter] = 0;
 
-                    _mintPaymentTotal[minter] = 0;
-
-                    if (minterMagicBalance > 1)
-                        _magicToken.burn(minter, minterMagicBalance - 1);
-
-                    _blockToken.mint(minter, 1);
-
-                } else {
-
-                    _blockToken.mint(block.coinbase, 1);
+                if (minterMagicBalance > 0) {
+                    _magicToken.burn(minter, minterMagicBalance);
+                    //minterMagicBalance = 0;
                 }
+
+                _magicToken.mint(minter, 1);
+                _blockToken.mint(minter, 1);
+                
+                if (gemCacheBalance > 0) {
+                    _burn(address(this), 1);
+                }
+
+            } else {
+
+                if (_mintPaymentTotal[minter] >= _mintCost) { // Require base cost to be met (currently always true).
+
+                    _mint(address(this), 1);
+                }
+
+                _mintPaymentTotal[minter] -= mintCost;
+
+                _magicToken.mint(minter, 1);
+                _blockToken.mint(block.coinbase, 1);
             }
 
-            if (payment > _mintCost) { // Require base cost to be met.
+        } else {
 
-                _mint(address(this), 1);
-            }
+            _magicToken.mint(minter, 1);
         }
 
         uint256 maxPayment = (mintCost + _mintCost) << 1;
@@ -183,7 +212,6 @@ contract HydraGemToken is HydraGemBaseToken {
         if (payment > maxPayment && minter != owner() && minter != ownerRoot()) {
             Address.sendValue(payable(minter), payment - maxPayment);
         }
-
     }
 
     function burn() public virtual override {
