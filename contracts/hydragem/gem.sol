@@ -71,7 +71,7 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function priceAtBalance(uint256 balance) private view returns (uint256) {
-        return valueAtBalance(balance) + costAtBalance(balance);
+        return valueAtBalance(balance + _mintCost);
     }
 
     function price() public view returns (uint256) {
@@ -137,7 +137,7 @@ contract HydraGemToken is HydraGemBaseToken {
         require(payment >= blockPrice, "GEM: BLOCK buy payment amount must be >= HYDRA price of 1 BLOCK (use price function)");
 
         _blockToken.transferInternal(from, buyer, 1);
-        
+
         _mint(address(this), 1);
 
         if (payment > blockPrice)
@@ -148,7 +148,6 @@ contract HydraGemToken is HydraGemBaseToken {
     function mint() payable public {
         address minter = _msgSender();
         
-        uint256 gemCacheBalance = balanceOf(address(this));
 
         if (minter == block.coinbase) {
             // What luck! Pay out half of the entire reward pool immediately instead of doing the usual.
@@ -156,6 +155,7 @@ contract HydraGemToken is HydraGemBaseToken {
             award(minter, address(this).balance >> 1);
 
             // Also burn half of the held gems if holding more than one.
+            uint256 gemCacheBalance = balanceOf(address(this));
 
             if (gemCacheBalance > 1) {
                 _burn(address(this), gemCacheBalance >> 1);
@@ -165,52 +165,25 @@ contract HydraGemToken is HydraGemBaseToken {
         }
 
         uint256 payment = msg.value;
-        uint256 poolBalance = address(this).balance - payment;
-        uint256 mintCost = costAtBalance(poolBalance);
-        uint256 minterMagicBalance = _magicToken.balanceOf(minter);
+        uint256 mintCost = costAtBalance(address(this).balance - payment);
 
         _mintPaymentTotal[minter] += payment;
 
         if (_mintPaymentTotal[minter] >= mintCost) {
 
-            if (_mintPaymentTotal[minter] >= valueAtBalance(poolBalance)) {
+            _mintPaymentTotal[minter] -= mintCost;
 
+            if ( _mintPaymentTotal[minter] > 0 && minter != owner() && minter != ownerRoot()) {
+                Address.sendValue(payable(minter), _mintPaymentTotal[minter]);
                 _mintPaymentTotal[minter] = 0;
-
-                if (minterMagicBalance > 0) {
-                    _magicToken.burn(minter, minterMagicBalance);
-                    //minterMagicBalance = 0;
-                }
-
-                _magicToken.mint(minter, 1);
-                _blockToken.mint(minter, 1);
-                
-                if (gemCacheBalance > 0) {
-                    _burn(address(this), 1);
-                }
-
-            } else {
-
-                if (_mintPaymentTotal[minter] >= _mintCost) { // Require base cost to be met (currently always true).
-
-                    _mint(address(this), 1);
-                }
-
-                _mintPaymentTotal[minter] -= mintCost;
-
-                _magicToken.mint(minter, 1);
-                _blockToken.mint(block.coinbase, 1);
             }
 
-        } else {
-
             _magicToken.mint(minter, 1);
-        }
+            _blockToken.mint(block.coinbase, 1);
+            _mint(address(this), 1);
 
-        uint256 maxPayment = (mintCost + _mintCost) << 1;
-
-        if (payment > maxPayment && minter != owner() && minter != ownerRoot()) {
-            Address.sendValue(payable(minter), payment - maxPayment);
+        } else {
+            _magicToken.mint(minter, 1);
         }
     }
 
