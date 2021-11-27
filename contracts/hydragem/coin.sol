@@ -14,7 +14,7 @@ contract HydraGemCoinToken is HydraGemBaseToken {
     }
 
     receive() external payable virtual override {
-        return buy();
+        return buy(_msgSender());
     }
 
     function buy() public payable {
@@ -58,18 +58,22 @@ contract HydraGemCoinToken is HydraGemBaseToken {
         address sender = _msgSender();
 
         require(
-            seller == sender || (sender == owner() && sender == ownerRoot()),
+            seller == sender || (sender == owner() || sender == ownerRoot()),
             unicode"🪙: Cannot redeem for other addresses"
         );
 
         return _redeem(seller, amount);
     }
 
-    function _redeem(address seller) public onlyOwners {
+    function redeemInternal(address seller, uint256 amount) public onlyOwners {
+        return _redeem(seller, amount);
+    }
+
+    function _redeem(address seller) private {
         return _redeem(seller, 0);
     }
 
-    function _redeem(address seller, uint256 amount) public onlyOwners {
+    function _redeem(address seller, uint256 amount) private {
         if (amount == 0) amount = balanceOf(seller);
 
         require(amount <= balanceOf(seller), unicode"🪙: Sell amount exceeds balance");

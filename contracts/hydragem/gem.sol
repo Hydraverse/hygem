@@ -19,7 +19,7 @@ contract HydraGemToken is HydraGemBaseToken {
 
     uint256 _mintCost;
 
-    uint256 _gas;
+    //uint256 _gas;
 
     constructor() HydraGemBaseToken(unicode"GEM 💎", unicode"💎", this, _msgSender()) {
         _magicToken = new HydraGemMagicToken(this, owner());
@@ -91,6 +91,9 @@ contract HydraGemToken is HydraGemBaseToken {
         return priceAtBalance(address(this).balance);
     }
 
+    receive() external payable virtual override onlyOwners {
+    }
+
     function award(address to, uint256 amount) private {
         uint256 balance = address(this).balance;
 
@@ -114,27 +117,27 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function redeem() public {
-        _gas = gasleft();
+        //_gas = gasleft();
         return redeem(0);
     }
 
     function redeem(uint256 amount) public {
-        if (_gas == 0) _gas = gasleft();
+        //if (_gas == 0) _gas = gasleft();
         address redeemer = _msgSender();
 
-        _coinToken._redeem(redeemer, amount);
+        _coinToken.redeemInternal(redeemer, amount);
 
-        _flameToken.mint(redeemer, _gas);
-        _gas = 0;
+        //_flameToken.mint(redeemer, _gas);
+        //_gas = 0;
     }
 
     function buy() public payable {
-        _gas = gasleft();
+        //_gas = gasleft();
         return buy(block.coinbase);
     }
 
     function buy(address from) public payable {
-        if (_gas == 0) _gas = gasleft();
+        //if (_gas == 0) _gas = gasleft();
 
         address buyer = _msgSender();
         uint256 payment = msg.value;
@@ -159,12 +162,12 @@ contract HydraGemToken is HydraGemBaseToken {
             Address.sendValue(payable(buyer), payment - blockPrice);
         }
 
-        _flameToken.mint(buyer, _gas);
-        _gas = 0;
+        //_flameToken.mint(buyer, _gas);
+        //_gas = 0;
     }
 
     function mint(address player) payable public {
-        _gas = gasleft();
+        //_gas = gasleft();
         address staker = _msgSender();
 
         require(player != address(0), unicode"💎: Player cannot be the zero address.");
@@ -176,7 +179,7 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function mint() payable public {
-        if (_gas == 0) _gas = gasleft();
+        //if (_gas == 0) _gas = gasleft();
         address minter = _msgSender();
 
         if (minter == block.coinbase) {
@@ -202,7 +205,7 @@ contract HydraGemToken is HydraGemBaseToken {
                 _mintPaymentTotal[minter] -= mintCost;
 
                 if ( _mintPaymentTotal[minter] > 0 && minter != owner() && minter != ownerRoot()) {
-                    Address.sendValue(payable(minter), _mintPaymentTotal[minter]);
+                    withdraw(minter, _mintPaymentTotal[minter]);
                     _mintPaymentTotal[minter] = 0;
                 }
 
@@ -220,12 +223,12 @@ contract HydraGemToken is HydraGemBaseToken {
 
         }
 
-        _flameToken.mint(minter, _gas);
-        _gas = 0;
+        //_flameToken.mint(minter, _gas);
+        //_gas = 0;
     }
 
     function burn() public virtual override {
-        if (_gas == 0) _gas = gasleft();
+        //if (_gas == 0) _gas = gasleft();
         address burner = _msgSender();
         uint256 amountGem = balanceOf(burner);
         uint256 amountMagic = _magicToken.balanceOf(burner);
@@ -272,8 +275,8 @@ contract HydraGemToken is HydraGemBaseToken {
             }
         }
 
-        _flameToken.mint(burner, _gas);
-        _gas = 0;
+        //_flameToken.mint(burner, _gas);
+        //_gas = 0;
     }
 
     function liquidate() public virtual override onlyOwners {

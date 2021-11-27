@@ -13,9 +13,8 @@ contract HydraGemFlameToken is HydraGemBaseToken {
         _coinToken = coinToken_;
     }
 
-    receive() external payable virtual override onlyOwners {
-        if (msg.value > 0)
-            _mint(address(this), msg.value);
+    receive() external payable virtual override {
+        return mint(_msgSender(), gasleft());
     }
 
     function mint() public {
@@ -29,7 +28,7 @@ contract HydraGemFlameToken is HydraGemBaseToken {
 
         require(amount >= gasleft(), unicode"🔥: mint() should be called with starting gas value");
 
-        if (to == 0) to = _msgSender();
+        if (to == address(0)) to = _msgSender();
 
         gas = amount - gasleft();
 
