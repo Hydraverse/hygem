@@ -64,42 +64,33 @@ abstract contract ERC20OwnerLiquidator is ERC20, ERC20SimpleTrackedBurner, DualO
     }
 }
 
-abstract contract OwnerAccountant is DualOwnable {
+abstract contract OwnerAccountant is Context {
 
-    receive() external payable virtual {
-        return deposit();
-    }
-
-    function deposit() public payable virtual onlyOwners {
-    }
-
-    function withdraw(address to, uint256 amount) public virtual onlyOwners {
+    function withdraw(address to, uint256 amount) internal {
         return Address.sendValue(payable(to), amount);
     }
 
-    function withdraw(address to) public virtual onlyOwners {
+    function withdraw(address to) internal {
         return Address.sendValue(payable(to), address(this).balance);
     }
 
-    function withdraw(uint256 amount) public virtual onlyOwners {
+    function withdraw(uint256 amount) internal {
         return Address.sendValue(payable(_msgSender()), amount);
     }
 
-    function withdraw() public virtual onlyOwners {
+    function withdraw() internal {
         return Address.sendValue(payable(_msgSender()), address(this).balance);
     }
 
-    function forward() public payable virtual onlyOwners {
+    function forward() internal {
         return forward(_msgSender());
     }
 
-    function forward(address to) public payable virtual onlyOwners {
-        return forward(to, address(this).balance - msg.value);
+    function forward(address to) internal {
+        return forward(to, address(this).balance);
     }
 
-    function forward(address to, uint256 amount) public payable virtual onlyOwners {
-        amount += msg.value;
-
+    function forward(address to, uint256 amount) internal {
         if (to != address(this) && amount > 0) {
             return withdraw(to, amount);
         }
