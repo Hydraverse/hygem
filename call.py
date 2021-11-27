@@ -7,22 +7,30 @@ import argparse
 import pprint
 
 CALL_MAP = {
-    "allowance(address,address)": "dd62ed3e",
     "balanceOf(address)": "70a08231",
+    "blockToken()": "1150e7a2",
     "burn()": "44df8e70",
-    "burn(address,uint256)": "9dc29fac",  # onlyOwner
     "burned(address)": "a7509b83",
     "buy(address)": "f088d547",
+    "cost()": "13faede6",
+    "cost(uint256)": "9097548d",
     "decimals()": "313ce567",
+    "gemToken()": "ff2fb57c",
+    "magicToken()": "c808b22b",
     "mint()": "1249c58b",
+    "mint(address)": "6a627842",
     "name()": "06fdde03",
+    "owner()": "8da5cb5b",
+    "ownerRoot()": "1663dd6f",
     "price()": "a035b1fe",
     "redeem()": "be040fb0",
     "redeem(uint256)": "db006a75",
+    "renounceOwnership()": "715018a6",
     "symbol()": "95d89b41",
     "totalSupply()": "18160ddd",
     "transfer(address,uint256)": "a9059cbb",
     "transferFrom(address,address,uint256)": "23b872dd",
+    "transferOwnership(address)": "f2fde38b",
     "value()": "3fa4f245"
 }
 
@@ -64,7 +72,7 @@ def format_call_param(call: str):
         return call.rjust(8, "0")
 
     except ValueError:
-        return CALL_MAP[call if "(" in call else f"{call}()"]
+        return CALL_MAP.get(call if "(" in call else f"{call}()", "00000000")
 
 
 def format_call(call: str, *params: (str, int, float)):

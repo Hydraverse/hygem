@@ -34,7 +34,7 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function costAtBalance(uint256 balance) private view returns (uint256) {
-        uint256 total = (totalSupply() + balanceOf(address(this)));
+        uint256 total = totalSupply() + balanceOf(address(this));
 
         if (balance == 0 || total == 0) {
             total = 1;
@@ -77,10 +77,6 @@ contract HydraGemToken is HydraGemBaseToken {
 
     function price() public view returns (uint256) {
         return priceAtBalance(address(this).balance);
-    }
-
-    receive() external payable virtual override {
-        mint();
     }
 
     function award(address to, uint256 amount) private {
@@ -127,7 +123,7 @@ contract HydraGemToken is HydraGemBaseToken {
         uint256 payment = msg.value;
 
         require(_blockToken.balanceOf(buyer) == 0, unicode"💎: 🧱 buyer cannot be already holding 🧱");
-        require(_magicToken.balanceOf(buyer) > 0, unicode"💎: 🧱 buyer must be holding MAGIC");
+        require(_magicToken.balanceOf(buyer) > 0, unicode"💎: 🧱 buyer must be holding 💫");
         require(_blockToken.balanceOf(from) >= 1, unicode"💎: 🧱 holder has insufficient 🧱 balance");
 
         uint256 blockPrice = priceAtBalance(address(this).balance - payment);
@@ -135,7 +131,7 @@ contract HydraGemToken is HydraGemBaseToken {
         if (_playingFor[buyer] == from) {
             blockPrice = 0;
         } else {
-            require(_magicToken.balanceOf(from) == 0, unicode"💎: 🧱 holder must not be holding MAGIC");
+            require(_magicToken.balanceOf(from) == 0, unicode"💎: 🧱 holder must not be holding 💫");
         }
 
         require(payment >= blockPrice, unicode"💎: payment amount for 🧱 must be >= HYDRA price of 1🧱 (use price function)");
@@ -206,24 +202,6 @@ contract HydraGemToken is HydraGemBaseToken {
     function burn() public virtual override {
         address burner = _msgSender();
         uint256 amountGem = balanceOf(burner);
-
-        if (amountGem > 0)  {
-            amountGem = 1; // Only burn one at a time.
-
-            uint256 payoutPerGem = value();
-
-            if (payoutPerGem > 0) {
-
-                burnFrom(burner, amountGem);
-
-                uint256 payout = amountGem * payoutPerGem;
-
-                award(burner, payout);
-            }
-
-            return; // Only allow one action at a time.
-        }
-
         uint256 amountMagic = _magicToken.balanceOf(burner);
         uint256 amountBlock = _blockToken.balanceOf(burner);
 
@@ -248,6 +226,25 @@ contract HydraGemToken is HydraGemBaseToken {
             if (amountToBurn > 0) {
                 _mint(burner, amountToBurn);
             }
+
+            return;  // Only allow one action at a time.
+        }
+
+        if (amountGem > 0)  {
+            amountGem = 1; // Only burn one at a time.
+
+            uint256 payoutPerGem = value();
+
+            if (payoutPerGem > 0) {
+
+                burnFrom(burner, amountGem);
+
+                uint256 payout = amountGem * payoutPerGem;
+
+                award(burner, payout);
+            }
+
+            return;
         }
     }
 
