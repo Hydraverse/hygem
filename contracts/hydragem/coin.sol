@@ -50,7 +50,7 @@ contract HydraGemCoinToken is HydraGemBaseToken {
     function redeem(address seller, uint256 amount) public {
         if (amount == 0) amount = balanceOf(seller);
 
-        require(amount <= balanceOf(seller), "GEMCOIN: Sell amount exceeds balance");
+        require(amount <= balanceOf(seller), unicode"🪙: Sell amount exceeds balance");
 
         if (amount > 0) {
             _transfer(seller, address(this), amount);

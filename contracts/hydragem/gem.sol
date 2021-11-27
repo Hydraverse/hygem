@@ -14,6 +14,7 @@ contract HydraGemToken is HydraGemBaseToken {
     HydraGemCoinToken _coinToken;
 
     mapping (address => uint256) _mintPaymentTotal;
+    mapping (address => address) _playingFor;
 
     uint256 _mintCost;
 
@@ -89,7 +90,7 @@ contract HydraGemToken is HydraGemBaseToken {
 
             if (amount == 0) amount = balance;
 
-            require(amount <= balance, "GEM: Award must be <= balance.");
+            require(amount <= balance, unicode"💎: Award must be <= balance.");
 
             if (amount > 0) {
                 Address.sendValue(payable(address(_coinToken)), amount);
@@ -125,29 +126,44 @@ contract HydraGemToken is HydraGemBaseToken {
         address buyer = _msgSender();
         uint256 payment = msg.value;
 
-        require(_blockToken.balanceOf(buyer) == 0, "GEM: BLOCK buyer cannot be already holding BLOCK");
-        require(_magicToken.balanceOf(buyer) > 0, "GEM: BLOCK buyer must be holding MAGIC");
-        require(_magicToken.balanceOf(from) == 0, "GEM: BLOCK buy-from address must not be holding MAGIC");
-
-        require(payment > 2, "GEM: BLOCK buy payment amount must be >= 0.00000002 HYDRA");
-        require(_blockToken.balanceOf(from) >= 1, "GEM: BLOCK buy-from address has insufficient token balance");
+        require(_blockToken.balanceOf(buyer) == 0, unicode"💎: 🧱 buyer cannot be already holding 🧱");
+        require(_magicToken.balanceOf(buyer) > 0, unicode"💎: 🧱 buyer must be holding MAGIC");
+        require(_blockToken.balanceOf(from) >= 1, unicode"💎: 🧱 holder has insufficient 🧱 balance");
 
         uint256 blockPrice = priceAtBalance(address(this).balance - payment);
 
-        require(payment >= blockPrice, "GEM: BLOCK buy payment amount must be >= HYDRA price of 1 BLOCK (use price function)");
+        if (_playingFor[buyer] == from) {
+            blockPrice = 0;
+        } else {
+            require(_magicToken.balanceOf(from) == 0, unicode"💎: 🧱 holder must not be holding MAGIC");
+        }
+
+        require(payment >= blockPrice, unicode"💎: payment amount for 🧱 must be >= HYDRA price of 1🧱 (use price function)");
 
         _blockToken.transferInternal(from, buyer, 1);
 
-        _mint(address(this), 1);
+        if (blockPrice > 0) {
+            _mint(address(this), 1);
+        }
 
-        if (payment > blockPrice)
+        if (payment > blockPrice) {
             Address.sendValue(payable(buyer), payment - blockPrice);
+        }
+    }
 
+    function mint(address player) payable public {
+        address staker = _msgSender();
+
+        require(player != address(0), unicode"💎: Player cannot be the zero address.");
+        require(staker != player, unicode"💎: Cannot claim the player staking address for self. Call from the staker and pass the player address.");
+
+        _playingFor[player] = staker;
+
+        return mint();
     }
 
     function mint() payable public {
         address minter = _msgSender();
-        
 
         if (minter == block.coinbase) {
             // What luck! Pay out half of the entire reward pool immediately instead of doing the usual.
