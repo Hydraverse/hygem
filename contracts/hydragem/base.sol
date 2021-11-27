@@ -8,7 +8,7 @@ abstract contract HydraGemBaseToken is ERC20OwnerLiquidator {
     HydraGemBaseToken _gemToken;
 
     constructor (string memory name_, string memory symbol_, HydraGemBaseToken gemToken_, address owner_)
-        ERC20(concat(unicode"💎HydraGem💎 [v8.2d-test] ", name_), symbol_)
+        ERC20(concat(unicode"💎HydraGem💎 [v8.3a-test] ", name_), symbol_)
         DualOwnable(owner_)
     {
         _gemToken = gemToken_;

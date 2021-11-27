@@ -133,7 +133,7 @@ halo@blade:halos ֍ ./call.py burn
 ### Main Contract
 
 ```
-4248bcd2b9d87936daa78736bdcbe85a511952a6 💎HydraGem💎 [v8.2d-test] GEM 💎 [testnet]
+4248bcd2b9d87936daa78736bdcbe85a511952a6 💎HydraGem💎 [v8.3a-test] GEM 💎 [testnet]
 ```
 
 ### Functions
@@ -218,15 +218,15 @@ All `HydraGem` contracts are tokens and share a common structure based from ERC2
 ### Auxiliary Contracts
 
 ```
-747aeb67834b97135032b28e34e116e5834f862d 💎HydraGem💎 [v8.2d-test] MAGIC 💫 [testnet]
+747aeb67834b97135032b28e34e116e5834f862d 💎HydraGem💎 [v8.3a-test] MAGIC 💫 [testnet]
 ```
 
 ```
-b4a5cfd1de02a1a3784207d3c4922f50c7e8b02e 💎HydraGem💎 [v8.2d-test] BLOCK 🧱 [testnet]
+b4a5cfd1de02a1a3784207d3c4922f50c7e8b02e 💎HydraGem💎 [v8.3a-test] BLOCK 🧱 [testnet]
 ```
 
 ```
-67b079e807a82463226fd1b83e6284ca887b1648 💎HydraGem💎 [v8.2d-test] GEMCOIN 🪙 [testnet]
+67b079e807a82463226fd1b83e6284ca887b1648 💎HydraGem💎 [v8.3a-test] GEMCOIN 🪙 [testnet]
 ```
 
 ### Functions
