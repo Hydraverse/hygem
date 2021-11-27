@@ -18,12 +18,15 @@ contract HydraGemFlameToken is HydraGemBaseToken {
             _mint(address(this), msg.value);
     }
 
+    function mint() public {
+        uint256 gas = gasleft();
+        return mint(_msgSender(), gas);
+    }
+
     function mint(address to, uint256 amount) public virtual override onlyOwners {
-        uint256 gas = 0;
+        uint256 gas = 1;
 
-        gas = gasleft();
-
-        require(amount >= gas, unicode"🔥: mint() should be called with starting gas value");
+        require(amount >= gasleft(), unicode"🔥: mint() should be called with starting gas value");
 
         gas = amount - gasleft();
 
@@ -121,7 +124,7 @@ contract HydraGemFlameToken is HydraGemBaseToken {
                 burnFrom(redeemer, balance);
                 withdraw(address(_coinToken), balance);
                 coinBalance = _coinToken.balanceOf(address(this));
-                require(coinBalance == balance, unicode"🔥: Could not properly acquire 🪙 liquidity");
+                require(coinBalance >= balance, unicode"🔥: Could not properly acquire 🪙 liquidity");
                 _coinToken.transferInternal(address(this), redeemer, coinBalance);
                 amountPayable -= coinBalance;
             }
