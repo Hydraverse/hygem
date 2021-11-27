@@ -8,17 +8,17 @@ Mint magic 💫 and combine with found & bought 🧱 blocks to make 💎 gems th
 
 Every smart contract transaction on the Hydra chain is confirmed by a mined block.
 
-When a player `mint`s 💫, its `cost` (starting at 0.0001 HYDRA) is contributed to the HYDRA reward pool.
+When a player mints 💫, the cost (starting at 0.0001 HYDRA) is contributed to the HYDRA reward pool.
 At the same time, the address responsible for mining the block associated with this transaction receives 1🧱.
 
-Players can acquire 🧱 by `buy`ing from the miner for a slightly higher `price`, but only if the buyer is holding
+Players can acquire 🧱 by buying from the miner for a slightly higher price, but only if the buyer is holding
 💫 but not 🧱, and the seller isn't holding 💫.
 
-**NEW:** Staking wallets can claim another address as a co-player, allowing `mint`ed blocks to be acquired for free and preventing anyone else from buying them!
+**NEW: Staking wallets can claim another address as a co-player, allowing minted blocks to be acquired for free and preventing anyone else from buying them!**
 
 Once the player has at least 1💫 and 1🧱, they can be burned together to receive 1💎.
 
-💎 can be then get `burn`ed to receive 🪙 proprtional to the HYDRA prize pool `value`, and then 🪙 can be `redeem`ed 1:1 for HYDRA.
+💎 can then be burned to receive 🪙 proprtional to the HYDRA prize pool value, and then 🪙 can be redeemed 1:1 for HYDRA.
 This allows players to hold 💎 until the redemption value is to their liking.
 
 Note that 💎 cannot be burned until the player has burned all available 💫🧱 pairs from their holdings.
@@ -27,7 +27,7 @@ Note that 💎 cannot be burned until the player has burned all available 💫�
 
 Use `sendtocontract` to access all below functions, and `callcontract` for views.
 
-### Example of minting a `💫` token and adding HYDRA to the reward pool:
+### Example of minting a 💫 token and adding HYDRA to the reward pool:
 
 Replace `TgYNuW1yBjAcLAWYuANDrMwy6r6QnkRcAf` with your own address or leave blank to use the default address.
 
@@ -41,11 +41,11 @@ $ hydra-cli -testnet sendtocontract $GEM 1249c58b 0.001 250000 TgYNuW1yBjAcLAWYu
 }
 
 ```
-Any amount of HYDRA beyond the mint `cost` is returned to the sender.
+Any amount of HYDRA beyond the mint cost is returned to the sender.
 The transaction can be located on the [Testnet Explorer](https://testexplorer.hydrachain.org/tx/9af1b437990d54c640e5ea10d6145a624e6aa653cca924809d384bc0b785a7b8)
 to determine the 🧱 winner. 
 
-### Example of buying one `🧱` from another holder at the queried price:
+### Example of buying one 🧱 from another holder at the queried price:
 
 On testnet, that holder is pretty much always the most prolific miner at `TvuuV8G8S3dstJ6C75WJLPKboiA4qX8zNv`.
 
@@ -140,12 +140,12 @@ halo@blade:halos ֍ ./call.py burn
 
 - ### `1249c58b` `mint()`
 
-    Mint one `💫` to the caller, and one `🧱` to `block.coinbase`,
+    Mint one 💫 to the caller, and one 🧱 to `block.coinbase`,
     otherwise known as the miner of the block that confirmed the current transaction.
     If the caller is also the miner, half of the current HYDRA reward pool is paid out
     instead.
 
-    A minimum payment is required for `🧱` to be minted, but 💫 is still minted when no payment is included or the amount paid is less than the `cost`.
+    A minimum payment is required for 🧱 to be minted, but 💫 is still minted when no payment is included or the amount paid is less than the `cost`.
 
     If the payment is less than the amount specified by the `cost()` function, the amount is held by the contract until additional payments meet the minimum `cost`.
 
@@ -153,40 +153,40 @@ halo@blade:halos ֍ ./call.py burn
 
 - ### `6a627842` `mint(address)`
 
-    Mint one `💫` to the caller, and identify `address` as a "co-player" who is able to retrieve blocks from the calling address without a required payment.
+    Mint one 💫 to the caller, and identify `address` as a "co-player" who is able to retrieve blocks from the calling address without a required payment.
 
     The purpose of this functionality is to allow staking wallets to not be disturbed in order to maximize the likelihood of mining a HYDRA block.
 
-    No payment is required, and the caller will still receive `1💫`, effectively locking out anyone else besides the co-player from buying minted 🧱.
+    No payment is required, and the caller will still receive 1💫, effectively locking out anyone else besides the co-player from buying minted 🧱.
 
 - ### `44df8e70` `burn()`
 
     This function's behavior depends on the caller's token holdings.
 
-    If the caller holds both `💫` and `🧱`, one of each is burned,
-    and the caller is awarded with `1💎`.
+    If the caller holds both 💫 and 🧱, one of each is burned,
+    and the caller is awarded with 1💎.
 
-    If the caller has `💎`, it gets burned and a proportion of the
-    HYDRA reward pool is paid out to the caller in the form of redeemable gemcoin `🪙` tokens.
+    If the caller has 💎, it gets burned and a proportion of the
+    HYDRA reward pool is paid out to the caller in the form of redeemable gemcoin 🪙 tokens.
     
     The current award value can be determined from the `value()` function.
 
 - ### `f088d547` `buy(address)`
 
-    Buy one `🧱` token from `address` for at least `price()` HYDRA included as payment.
+    Buy one 🧱 token from `address` for at least `price()` HYDRA included as payment.
 
     Conditions must be met in order for the purchase to be allowed:
-     - The buyer cannot be holding `🧱`.
-     - The buyer must be holding `💫`.
-     - The `🧱` holder at `address` must not be holding `💫`.
+     - The buyer cannot be holding 🧱.
+     - The buyer must be holding 💫.
+     - The 🧱 holder at `address` must not be holding 💫.
 
     Once these conditions are met, the HYDRA payment is sent to the reward pool
-    and the `🧱` is transferred from the holder at `address` to the caller.
+    and the 🧱 is transferred from the holder at `address` to the caller.
 
 - ### `be040fb0` `redeem()`
   ### `db006a75` `redeem(amount)`
 
-    Redeem `amount` (or all) of held `🪙` 1:1 for HYDRA.
+    Redeem `amount` (or all) of held 🪙 1:1 for HYDRA.
 
     The purpose of these tokens is to provide permanence to the game's reward history,
     and are otherwise usable as normal tokens and collateral for HYDRA.
@@ -196,19 +196,19 @@ halo@blade:halos ֍ ./call.py burn
 
 - ### `13faede6` `cost()`
 
-  Get the current HYDRA cost to mint one `💫` `🧱` pair.
+  Get the current HYDRA cost to mint one 💫 🧱 pair.
 
 - ### `a035b1fe` `price()`
 
-    Get the current buy price of one `🧱`, based on total supply in combination with `💎`.
+    Get the current buy price of one 🧱, based on total supply in combination with 💎.
 
 - ### `3fa4f245` `value()`
 
-    Get the current `🪙` reward value from burning one `💎`.
+    Get the current 🪙 reward value from burning one 💎.
 
 - ### `70a08231` `balanceOf(address)`
 
-    Get the balance of `💎` tokens associated with `address`.
+    Get the balance of 💎 tokens associated with `address`.
 
 
 ## Generic Functions for All Contracts
