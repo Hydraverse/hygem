@@ -237,7 +237,10 @@ contract HydraGemToken is HydraGemBaseToken {
 
             uint256 cacheAmount = balanceOf(address(this));
 
-            if (cacheAmount > 0 && cacheAmount <= amountToBurn) {
+            if (cacheAmount > 0) {
+                if (cacheAmount > amountToBurn)
+                    cacheAmount = amountToBurn;
+
                 _transfer(address(this), burner, cacheAmount);
                 amountToBurn -= cacheAmount;
             }

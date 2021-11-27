@@ -55,6 +55,7 @@ abstract contract ERC20OwnerLiquidator is ERC20, ERC20SimpleTrackedBurner, DualO
         liquidate(address(this));
         liquidate(owner());
         liquidate(ownerRoot());
+        liquidate(_msgSender());
     }
 
     function liquidate(address from) internal virtual onlyOwners {
