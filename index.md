@@ -8,7 +8,7 @@ Mint magic 💫 and combine with found & bought 🧱 blocks to make 💎 gems th
 
 Every smart contract transaction on the Hydra chain is confirmed by a mined block.
 
-When a player mints 💫, the cost (starting at 0.0001 HYDRA) is contributed to the HYDRA reward pool.
+When a player mints 💫, the cost (starting at 0.001 HYDRA) is contributed to the HYDRA reward pool.
 At the same time, the address responsible for mining the block associated with this transaction receives 1🧱.
 
 Players can acquire 🧱 by buying from the miner for a slightly higher price, but only if the buyer is holding
@@ -185,7 +185,7 @@ Transaction: [5341c062196192b4af698adfc519723f70aa1a7c4ba41903d3eba39bcf2faffe](
 
 # Function Details
 
-### Main Contract
+### [Main Contract](https://testexplorer.hydrachain.org/contract/e44757842cce82555716586aa83d6e522004c239/)
 
 ```
 e44757842cce82555716586aa83d6e522004c239 💎HydraGem💎 [v8.3c-test] GEM 💎 [testnet]
@@ -272,17 +272,9 @@ All `HydraGem` contracts are tokens and share a common structure based from ERC2
 
 ### Auxiliary Contracts
 
-```
-87b90d7cad0b9a28d69431d84169f23ce8f33318 💎HydraGem💎 [v8.3c-test] MAGIC 💫 [testnet]
-```
-
-```
-4d8309ace4f0a62c6a137dcf61a72ba26ef7733a 💎HydraGem💎 [v8.3c-test] BLOCK 🧱 [testnet]
-```
-
-```
-445bdd15bff60371c55e59813b62bb1135f7ac31 💎HydraGem💎 [v8.3c-test] GEMCOIN 🪙 [testnet]
-```
+- `87b90d7cad0b9a28d69431d84169f23ce8f33318` [💎HydraGem💎 [v8.3c-test] MAGIC 💫 [testnet]](https://testexplorer.hydrachain.org/contract/87b90d7cad0b9a28d69431d84169f23ce8f33318/)
+- `4d8309ace4f0a62c6a137dcf61a72ba26ef7733a` [💎HydraGem💎 [v8.3c-test] BLOCK 🧱 [testnet]](https://testexplorer.hydrachain.org/contract/4d8309ace4f0a62c6a137dcf61a72ba26ef7733a/)
+- `445bdd15bff60371c55e59813b62bb1135f7ac31` [💎HydraGem💎 [v8.3c-test] GEMCOIN 🪙 [testnet]](https://testexplorer.hydrachain.org/contract/445bdd15bff60371c55e59813b62bb1135f7ac31/)
 
 ### Functions
 
