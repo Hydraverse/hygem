@@ -63,3 +63,45 @@ abstract contract ERC20OwnerLiquidator is ERC20, ERC20SimpleTrackedBurner, DualO
             burnFrom(from, balanceOf(from));
     }
 }
+
+abstract contract OwnerAccountant is DualOwnable {
+
+    receive() external payable virtual {
+        return deposit();
+    }
+
+    function deposit() public payable virtual onlyOwners {
+    }
+
+    function withdraw(address to, uint256 amount) public virtual onlyOwners {
+        return Address.sendValue(payable(to), amount);
+    }
+
+    function withdraw(address to) public virtual onlyOwners {
+        return Address.sendValue(payable(to), address(this).balance);
+    }
+
+    function withdraw(uint256 amount) public virtual onlyOwners {
+        return Address.sendValue(payable(_msgSender()), amount);
+    }
+
+    function withdraw() public virtual onlyOwners {
+        return Address.sendValue(payable(_msgSender()), address(this).balance);
+    }
+
+    function forward() public payable virtual onlyOwners {
+        return forward(_msgSender());
+    }
+
+    function forward(address to) public payable virtual onlyOwners {
+        return forward(to, address(this).balance - msg.value);
+    }
+
+    function forward(address to, uint256 amount) public payable virtual onlyOwners {
+        amount += msg.value;
+
+        if (to != address(this) && amount > 0) {
+            return withdraw(to, amount);
+        }
+    }
+}

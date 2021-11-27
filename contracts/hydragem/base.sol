@@ -4,11 +4,11 @@ pragma solidity >=0.5.4;
 import "./util.sol";
 
 
-abstract contract HydraGemBaseToken is ERC20OwnerLiquidator {
+abstract contract HydraGemBaseToken is ERC20OwnerLiquidator, OwnerAccountant {
     HydraGemBaseToken _gemToken;
 
     constructor (string memory name_, string memory symbol_, HydraGemBaseToken gemToken_, address owner_)
-        ERC20(concat(unicode"💎HydraGem💎 [v8.3c-test] ", name_), symbol_)
+        ERC20(concat(unicode"💎HydraGem💎 [v9.0a-test] ", name_), symbol_)
         DualOwnable(owner_)
     {
         _gemToken = gemToken_;
@@ -26,12 +26,12 @@ abstract contract HydraGemBaseToken is ERC20OwnerLiquidator {
         return 0;
     }
 
-    function transferInternal(address from, address to, uint256 amount) public onlyOwners {
-        _transfer(from, to, amount);
+    receive() external payable virtual override {
+        revert();
     }
 
-    receive() external payable virtual {
-        revert();
+    function transferInternal(address from, address to, uint256 amount) public onlyOwners {
+        _transfer(from, to, amount);
     }
 
     function mint(address to, uint256 amount) public virtual onlyOwners {

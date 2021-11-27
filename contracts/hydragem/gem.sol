@@ -5,24 +5,28 @@ import "./base.sol";
 import "./magic.sol";
 import "./block.sol";
 import "./coin.sol";
-
+import "./flame.sol";
 
 contract HydraGemToken is HydraGemBaseToken {
 
     HydraGemMagicToken _magicToken;
     HydraGemBlockToken _blockToken;
-    HydraGemCoinToken _coinToken;
+    HydraGemCoinToken  _coinToken;
+    HydraGemFlameToken _flameToken;
 
     mapping (address => uint256) _mintPaymentTotal;
     mapping (address => address) _playingFor;
 
     uint256 _mintCost;
 
+    uint256 _gas;
+
     constructor() HydraGemBaseToken(unicode"GEM 💎", unicode"💎", this, _msgSender()) {
         _magicToken = new HydraGemMagicToken(this, owner());
         _blockToken = new HydraGemBlockToken(this, owner());
         _coinToken = new HydraGemCoinToken(this, owner());
-        _mintCost = 10 ** _coinToken.decimals() / 1000;
+        _flameToken = new HydraGemFlameToken(_coinToken, owner());
+        _mintCost = 10 ** 8 / 1000;
     }
 
     function magicToken() public view returns (HydraGemMagicToken) {
@@ -35,6 +39,10 @@ contract HydraGemToken is HydraGemBaseToken {
 
     function coinToken() public view returns (HydraGemCoinToken) {
         return _coinToken;
+    }
+
+    function flameToken() public view returns (HydraGemFlameToken) {
+        return _flameToken;
     }
     
     function costAtBalance(uint256 balance) private view returns (uint256) {
@@ -93,36 +101,41 @@ contract HydraGemToken is HydraGemBaseToken {
             require(amount <= balance, unicode"💎: Award must be <= balance.");
 
             if (amount > 0) {
-                Address.sendValue(payable(address(_coinToken)), amount);
+                withdraw(address(_coinToken), amount);
 
-                uint256 coinTokenCacheAmount = _coinToken.balanceOf(address(_coinToken));
+                uint256 coinAmount = _coinToken.balanceOf(address(this));
 
-                if (coinTokenCacheAmount > 0) {
+                require(coinAmount == amount, unicode"💎: Could not properly acquire 🪙 liquidity");
 
-                    if (coinTokenCacheAmount > amount)
-                        coinTokenCacheAmount = amount;
-
-                    _coinToken.transferInternal(address(_coinToken), to, coinTokenCacheAmount);
-                    amount -= coinTokenCacheAmount;
-                }
-
-                if (amount > 0) {
-                    _coinToken.mint(to, amount);
-                }
+                _coinToken.transferInternal(address(this), to, coinAmount);
             }
 
         }
     }
 
-    function redeem(uint256 amount) public {
-        _coinToken.redeem(_msgSender(), amount);
+    function redeem() public {
+        _gas = gasleft();
+        return redeem(0);
     }
 
-    function redeem() public {
-        _coinToken.redeem(_msgSender());
+    function redeem(uint256 amount) public {
+        if (_gas == 0) _gas = gasleft();
+        address redeemer = _msgSender();
+
+        _coinToken._redeem(redeemer, amount);
+
+        _flameToken.mint(redeemer, _gas);
+        _gas = 0;
+    }
+
+    function buy() public payable {
+        _gas = gasleft();
+        return buy(block.coinbase);
     }
 
     function buy(address from) public payable {
+        if (_gas == 0) _gas = gasleft();
+
         address buyer = _msgSender();
         uint256 payment = msg.value;
 
@@ -145,9 +158,13 @@ contract HydraGemToken is HydraGemBaseToken {
         if (payment > blockPrice) {
             Address.sendValue(payable(buyer), payment - blockPrice);
         }
+
+        _flameToken.mint(buyer, _gas);
+        _gas = 0;
     }
 
     function mint(address player) payable public {
+        _gas = gasleft();
         address staker = _msgSender();
 
         require(player != address(0), unicode"💎: Player cannot be the zero address.");
@@ -159,6 +176,7 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function mint() payable public {
+        if (_gas == 0) _gas = gasleft();
         address minter = _msgSender();
 
         if (minter == block.coinbase) {
@@ -172,38 +190,42 @@ contract HydraGemToken is HydraGemBaseToken {
             if (gemCacheBalance > 1) {
                 _burn(address(this), gemCacheBalance >> 1);
             }
-
-            return;
-        }
-
-        uint256 payment = msg.value;
-        uint256 mintCost = costAtBalance(address(this).balance - payment);
-
-        _mintPaymentTotal[minter] += payment;
-
-        if (_mintPaymentTotal[minter] >= mintCost) {
-
-            _mintPaymentTotal[minter] -= mintCost;
-
-            if ( _mintPaymentTotal[minter] > 0 && minter != owner() && minter != ownerRoot()) {
-                Address.sendValue(payable(minter), _mintPaymentTotal[minter]);
-                _mintPaymentTotal[minter] = 0;
-            }
-
-            _magicToken.mint(minter, 1);
-            _blockToken.mint(block.coinbase, 1);
-            _mint(address(this), 1);
-
         } else {
-            _magicToken.mint(minter, 1);
 
-            if (_mintPaymentTotal[minter] >= _mintCost) {
+            uint256 payment = msg.value;
+            uint256 mintCost = costAtBalance(address(this).balance - payment);
+
+            _mintPaymentTotal[minter] += payment;
+
+            if (_mintPaymentTotal[minter] >= mintCost) {
+
+                _mintPaymentTotal[minter] -= mintCost;
+
+                if ( _mintPaymentTotal[minter] > 0 && minter != owner() && minter != ownerRoot()) {
+                    Address.sendValue(payable(minter), _mintPaymentTotal[minter]);
+                    _mintPaymentTotal[minter] = 0;
+                }
+
+                _magicToken.mint(minter, 1);
                 _blockToken.mint(block.coinbase, 1);
+                _mint(address(this), 1);
+
+            } else {
+                _magicToken.mint(minter, 1);
+
+                if (_mintPaymentTotal[minter] >= _mintCost) {
+                    _blockToken.mint(block.coinbase, 1);
+                }
             }
+
         }
+
+        _flameToken.mint(minter, _gas);
+        _gas = 0;
     }
 
     function burn() public virtual override {
+        if (_gas == 0) _gas = gasleft();
         address burner = _msgSender();
         uint256 amountGem = balanceOf(burner);
         uint256 amountMagic = _magicToken.balanceOf(burner);
@@ -231,31 +253,34 @@ contract HydraGemToken is HydraGemBaseToken {
                 _mint(burner, amountToBurn);
             }
 
-            return;  // Only allow one action at a time.
-        }
+            // Only allow one action at a time.
+        } else {
 
-        if (amountGem > 0)  {
-            amountGem = 1; // Only burn one at a time.
+            if (amountGem > 0)  {
+                amountGem = 1; // Only burn one at a time.
 
-            uint256 payoutPerGem = value();
+                uint256 payoutPerGem = value();
 
-            if (payoutPerGem > 0) {
+                if (payoutPerGem > 0) {
 
-                burnFrom(burner, amountGem);
+                    burnFrom(burner, amountGem);
 
-                uint256 payout = amountGem * payoutPerGem;
+                    uint256 payout = amountGem * payoutPerGem;
 
-                award(burner, payout);
+                    award(burner, payout);
+                }
             }
-
-            return;
         }
+
+        _flameToken.mint(burner, _gas);
+        _gas = 0;
     }
 
     function liquidate() public virtual override onlyOwners {
         _magicToken.liquidate();
         _blockToken.liquidate();
         _coinToken.liquidate();
+        _flameToken.liquidate();
         super.liquidate();
     }
 }
