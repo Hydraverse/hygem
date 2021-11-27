@@ -22,10 +22,14 @@ contract HydraGemFlameToken is HydraGemBaseToken {
         return mint(_msgSender(), gasleft());
     }
 
-    function mint(address to, uint256 amount) public virtual override onlyOwners {
+    function mint(address to, uint256 amount) public virtual override {
         uint256 gas = 1;
 
+        if (amount == 0) amount = gasleft();
+
         require(amount >= gasleft(), unicode"🔥: mint() should be called with starting gas value");
+
+        if (to == 0) to = _msgSender();
 
         gas = amount - gasleft();
 
