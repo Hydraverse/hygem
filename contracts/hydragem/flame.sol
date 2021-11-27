@@ -19,8 +19,7 @@ contract HydraGemFlameToken is HydraGemBaseToken {
     }
 
     function mint() public {
-        uint256 gas = gasleft();
-        return mint(_msgSender(), gas);
+        return mint(_msgSender(), gasleft());
     }
 
     function mint(address to, uint256 amount) public virtual override onlyOwners {
@@ -31,7 +30,7 @@ contract HydraGemFlameToken is HydraGemBaseToken {
         gas = amount - gasleft();
 
         if (gas > 0)
-            _mint(to, amount - gas);
+            _mint(to, gas);
     }
 
     function redeemable() public view returns (bool) {
