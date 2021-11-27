@@ -7,15 +7,20 @@ import argparse
 import pprint
 
 CALL_MAP = {
+    "allowance(address,address)": "dd62ed3e",
+    "approve(address,uint256)": "095ea7b3",
     "balanceOf(address)": "70a08231",
     "blockToken()": "1150e7a2",
     "burn()": "44df8e70",
     "burned(address)": "a7509b83",
     "buy(address)": "f088d547",
+    "coinToken()": "58797cb6",
     "cost()": "13faede6",
     "cost(uint256)": "9097548d",
     "decimals()": "313ce567",
+    "decreaseAllowance(address,uint256)": "a457c2d7",
     "gemToken()": "ff2fb57c",
+    "increaseAllowance(address,uint256)": "39509351",
     "magicToken()": "c808b22b",
     "mint()": "1249c58b",
     "mint(address)": "6a627842",
@@ -25,12 +30,10 @@ CALL_MAP = {
     "price()": "a035b1fe",
     "redeem()": "be040fb0",
     "redeem(uint256)": "db006a75",
-    "renounceOwnership()": "715018a6",
     "symbol()": "95d89b41",
     "totalSupply()": "18160ddd",
     "transfer(address,uint256)": "a9059cbb",
     "transferFrom(address,address,uint256)": "23b872dd",
-    "transferOwnership(address)": "f2fde38b",
     "value()": "3fa4f245"
 }
 

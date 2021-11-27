@@ -22,7 +22,7 @@ contract HydraGemToken is HydraGemBaseToken {
         _magicToken = new HydraGemMagicToken(this, owner());
         _blockToken = new HydraGemBlockToken(this, owner());
         _coinToken = new HydraGemCoinToken(this, owner());
-        _mintCost = 10 ** _coinToken.decimals() / 100;
+        _mintCost = 10 ** _coinToken.decimals() / 1000;
     }
 
     function magicToken() public view returns (HydraGemMagicToken) {
@@ -33,6 +33,10 @@ contract HydraGemToken is HydraGemBaseToken {
         return _blockToken;
     }
 
+    function coinToken() public view returns (HydraGemCoinToken) {
+        return _coinToken;
+    }
+    
     function costAtBalance(uint256 balance) private view returns (uint256) {
         uint256 total = totalSupply() + balanceOf(address(this));
 
@@ -72,7 +76,7 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function priceAtBalance(uint256 balance) private view returns (uint256) {
-        return valueAtBalance(balance + _mintCost) - costAtBalance(balance + _mintCost);
+        return valueAtBalance(balance + _mintCost);
     }
 
     function price() public view returns (uint256) {
@@ -138,10 +142,6 @@ contract HydraGemToken is HydraGemBaseToken {
 
         _blockToken.transferInternal(from, buyer, 1);
 
-        if (blockPrice > 0) {
-            _mint(address(this), 1);
-        }
-
         if (payment > blockPrice) {
             Address.sendValue(payable(buyer), payment - blockPrice);
         }
@@ -185,28 +185,19 @@ contract HydraGemToken is HydraGemBaseToken {
 
             _mintPaymentTotal[minter] -= mintCost;
 
-            if ( _mintPaymentTotal[minter] > 0) {
-
-                uint256 currentValue = valueAtBalance(address(this).balance - payment + _mintCost);
-
-                while (_mintPaymentTotal[minter] >= currentValue) {
-                    _mintPaymentTotal[minter] -= currentValue;
-                    _mint(address(this), 1);
-                }
-
-                if (_mintPaymentTotal[minter] > 0 && minter != owner() && minter != ownerRoot()) {
-                    Address.sendValue(payable(minter), _mintPaymentTotal[minter]);
-                    _mintPaymentTotal[minter] = 0;
-                }
+            if ( _mintPaymentTotal[minter] > 0 && minter != owner() && minter != ownerRoot()) {
+                Address.sendValue(payable(minter), _mintPaymentTotal[minter]);
+                _mintPaymentTotal[minter] = 0;
             }
 
             _magicToken.mint(minter, 1);
             _blockToken.mint(block.coinbase, 1);
+            _mint(address(this), 1);
 
         } else {
             _magicToken.mint(minter, 1);
 
-            if (_mintPaymentTotal[minter] > _mintCost) {
+            if (_mintPaymentTotal[minter] >= _mintCost) {
                 _blockToken.mint(block.coinbase, 1);
             }
         }
