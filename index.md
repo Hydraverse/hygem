@@ -1,14 +1,18 @@
 # HydraGem Mining Game
-
+****
 Mint magic 💫 and combine with found & bought 🧱 blocks to make 💎 gems that pay a reward when burned!
 
 🪙 Gemcoin rewards are redeemable 1:1 for HYDRA and can be bought, sold or traded.
+
+**NEW: 🪙 can now be used for minting and buying 🧱 -- no more draining UTXOs for anything but the TX fees!!**
+
+**ALSO: 🔥 is now minted for _gas_ that gets used for gameplay! These tokens will acquire value whenever the contract creator periodically refunds gameplay fees.**
 
 ### How it works:
 
 Every smart contract transaction on the Hydra chain is confirmed by a mined block.
 
-When a player mints 💫, the cost (starting at 0.001 HYDRA) is contributed to the HYDRA reward pool.
+When a player mints 💫, the cost (starting at 0.001 HYDRA, or 1🪙) is contributed to the HYDRA reward pool.
 At the same time, the address responsible for mining the block associated with this transaction receives 1🧱.
 
 Players can acquire 🧱 by buying from the miner for a slightly higher price, but only if the buyer is holding
@@ -29,21 +33,20 @@ Use `sendtocontract` to access all below functions, and `callcontract` for views
 
 ### Example of minting a 💫 token and adding HYDRA to the reward pool:
 
-Replace `TgYNuW1yBjAcLAWYuANDrMwy6r6QnkRcAf` with your own address or leave blank to use the default address.
+Replace `ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU` with your own address or leave blank to use the default address.
 
 ```shell
-$ GEM=e44757842cce82555716586aa83d6e522004c239
-$ hydra-cli -testnet sendtocontract $GEM 1249c58b 0.001 250000 TgYNuW1yBjAcLAWYuANDrMwy6r6QnkRcAf  # mint()
+$ GEM=f57944a55d1d95cb2fab513171f2230e68931f7b
+$ ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU
+$ hydra-cli -testnet sendtocontract $GEM 1249c58b 0.001 250000 $ADDR  # mint()
 {
-  "txid": "40d7a7e857d6c6e0c3663b36e56aa68f883a786d1489cd6dea4c631fb821659f",
-  "sender": "TgYNuW1yBjAcLAWYuANDrMwy6r6QnkRcAf",
-  "hash160": "4f59c49134ba043dc24a36e551be50eea6a46cb8"
+  "txid": "f3eda80eab53e95109a3c02f1d011f82208be45f7e17dc03ac7edcc6d1bb7162",
+  "sender": "Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU",
+  "hash160": "ca253ac9875464ddfb30f498c9e0e64bab7c6360"
 }
-
-
 ```
 Any amount of HYDRA beyond the mint cost is returned to the sender.
-The transaction can be located on the [Testnet Explorer](https://testexplorer.hydrachain.org/tx/40d7a7e857d6c6e0c3663b36e56aa68f883a786d1489cd6dea4c631fb821659f)
+The transaction can be located on the [Testnet Explorer](https://testexplorer.hydrachain.org/tx/f3eda80eab53e95109a3c02f1d011f82208be45f7e17dc03ac7edcc6d1bb7162)
 to determine the 🧱 winner. 
 
 ### Example of buying one 🧱 from another holder at the queried price:
@@ -53,31 +56,29 @@ On testnet, that holder is pretty much always the most prolific miner at `TvuuV8
 ```shell
 $ hydra-cli -testnet callcontract $GEM a035b1fe # price()
 {
-  "address": "e44757842cce82555716586aa83d6e522004c239",
+  "address": "f57944a55d1d95cb2fab513171f2230e68931f7b",
   "executionResult": {
     ...
-    "output": "0000000000000000000000000000000000000000000000000000000000030d40",
+    "output": "000000000000000000000000000000000000000000000000000000000002781c",
     ...
   },
   ...
 }
 
-$ python3 -c 'print(0x30d40 / 10**8)'
-0.002
+python3 -c 'print(0x2781c / 10**8)'
+0.0016182
 
 $ hydra-cli -testnet gethexaddress TvuuV8G8S3dstJ6C75WJLPKboiA4qX8zNv
 ecfdca6aced679c041241de8d12a90779f3dc71a
 
-$ hydra-cli -testnet sendtocontract $GEM f088d547000000000000000000000000ecfdca6aced679c041241de8d12a90779f3dc71a 0.002 250000 TgYNuW1yBjAcLAWYuANDrMwy6r6QnkRcAf  # buy()
+$ hydra-cli -testnet sendtocontract $GEM f088d547000000000000000000000000ecfdca6aced679c041241de8d12a90779f3dc71a 0.1 250000 $ADDR  # buy()
 {
-  "txid": "fec5ca866769d62178ad3aa75eb4711a5b40babefde2de6316e0b85e26605fb0",
-  "sender": "TgYNuW1yBjAcLAWYuANDrMwy6r6QnkRcAf",
-  "hash160": "4f59c49134ba043dc24a36e551be50eea6a46cb8"
+  "txid": "9095a2aee45fb9e98be4cc96f72aac43ecaad50c808cf6902d546c9099e6a3a4",
+  "sender": "Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU",
+  "hash160": "ca253ac9875464ddfb30f498c9e0e64bab7c6360"
 }
-
-
 ```
-The resulting call on the blockchain can be found [here](https://testexplorer.hydrachain.org/tx/fec5ca866769d62178ad3aa75eb4711a5b40babefde2de6316e0b85e26605fb0).
+The resulting call on the blockchain can be found [here](https://testexplorer.hydrachain.org/tx/9095a2aee45fb9e98be4cc96f72aac43ecaad50c808cf6902d546c9099e6a3a4).
 
 Any excess HYDRA paid will be returned, so it's also possible to skip checking the `price` and set a maximum amount instead.
 
@@ -103,20 +104,22 @@ optional arguments:
   -V, --version  show program's version number and exit
   -l, --list     list known functions
   
-halo@blade:halos ֍ ./call.py -l
+halo@blade:halos ֍ ./call.py --list
 {
-    'allowance(address,address)': 'dd62ed3e',
-    'balanceOf(address)': '70a08231',
     'burn()': '44df8e70',
     'burned(address)': 'a7509b83',
+    'buy()': 'a6f2ae3a',
     'buy(address)': 'f088d547',
-    'decimals()': '313ce567',
+    'coins()': '22fcefbe',
+    'cost()': '13faede6',
     'mint()': '1249c58b',
+    'mint(address)': '6a627842',
     'name()': '06fdde03',
     'price()': 'a035b1fe',
     'redeem()': 'be040fb0',
     'redeem(uint256)': 'db006a75',
     'symbol()': '95d89b41',
+    'totalBalance()': 'ad7a672f',
     'totalSupply()': '18160ddd',
     'transfer(address,uint256)': 'a9059cbb',
     'transferFrom(address,address,uint256)': '23b872dd',
@@ -137,30 +140,28 @@ Now that 1🧱 has been bought, 1💎 can be obtained by calling `burn`.
 ```shell
 $ ./call.py burn
 44df8e70
-$ hydra-cli -testnet sendtocontract $GEM 44df8e70 0 250000 TgYNuW1yBjAcLAWYuANDrMwy6r6QnkRcAf  # burn() 
+$ hydra-cli -testnet sendtocontract $GEM 44df8e70 0 250000 $ADDR  # burn() 
 {
-  "txid": "0e57ecfb0790cb93b389df945c53a1bb686e63203cd1b0be6aa04cf16a5483bb",
-  "sender": "TgYNuW1yBjAcLAWYuANDrMwy6r6QnkRcAf",
-  "hash160": "4f59c49134ba043dc24a36e551be50eea6a46cb8"
+  "txid": "3c93ec6f8c66e69de22a6e13a8b1cadcd23e9d60f7e0b2294e156d2ecb540ab3",
+  "sender": "Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU",
+  "hash160": "ca253ac9875464ddfb30f498c9e0e64bab7c6360"
 }
-
 ```
-Transaction: [0e57ecfb0790cb93b389df945c53a1bb686e63203cd1b0be6aa04cf16a5483bb](https://testexplorer.hydrachain.org/tx/fec5ca866769d62178ad3aa75eb4711a5b40babefde2de6316e0b85e26605fb0)
+Transaction: [3c93ec6f8c66e69de22a6e13a8b1cadcd23e9d60f7e0b2294e156d2ecb540ab3](https://testexplorer.hydrachain.org/tx/3c93ec6f8c66e69de22a6e13a8b1cadcd23e9d60f7e0b2294e156d2ecb540ab3)
 
 ### Example of burning 💎 to get 🪙 award (same call):
 
 After obtaining 💎, it can be held, traded or burned to receive 🪙.
 
 ```shell
-$ hydra-cli -testnet sendtocontract $GEM 44df8e70 0 250000 TgYNuW1yBjAcLAWYuANDrMwy6r6QnkRcAf  # burn() 
+$ hydra-cli -testnet sendtocontract $GEM 44df8e70 0 250000 $ADDR  # burn() 
 {
-  "txid": "3b50da692b6819eb7c5c69e1499d91969cadbe80de681e41c162cf420ab5bc3c",
-  "sender": "TgYNuW1yBjAcLAWYuANDrMwy6r6QnkRcAf",
-  "hash160": "4f59c49134ba043dc24a36e551be50eea6a46cb8"
+  "txid": "43c38847c29e37466f4719623f514b5066a58603c8285486396b3c558c2838cb",
+  "sender": "Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU",
+  "hash160": "ca253ac9875464ddfb30f498c9e0e64bab7c6360"
 }
-
 ```
-Transaction: [3b50da692b6819eb7c5c69e1499d91969cadbe80de681e41c162cf420ab5bc3c](https://testexplorer.hydrachain.org/tx/3b50da692b6819eb7c5c69e1499d91969cadbe80de681e41c162cf420ab5bc3c)
+Transaction: [43c38847c29e37466f4719623f514b5066a58603c8285486396b3c558c2838cb](https://testexplorer.hydrachain.org/tx/43c38847c29e37466f4719623f514b5066a58603c8285486396b3c558c2838cb)
 
 
 ### Example of redeeming 🪙 for HYDRA:
@@ -168,28 +169,24 @@ Transaction: [3b50da692b6819eb7c5c69e1499d91969cadbe80de681e41c162cf420ab5bc3c](
 🪙 always has a 1:1 value with HYDRA and available liquidity to exchange tokens.
 
 ```shell
-$ ./call.py redeem
-be040fb0
-$ hydra-cli -testnet sendtocontract $GEM be040fb0 0 250000 TgYNuW1yBjAcLAWYuANDrMwy6r6QnkRcAf  # redeem() 
+$ CALL="$(./call.py 'redeem(uint256)' 1.0)"
+db006a7500000000000000000000000000000000000000000000000000000000000186a0
+$ hydra-cli -testnet sendtocontract $GEM $CALL 0 250000 $ADDR
 {
-  "txid": "5341c062196192b4af698adfc519723f70aa1a7c4ba41903d3eba39bcf2faffe",
-  "sender": "TgYNuW1yBjAcLAWYuANDrMwy6r6QnkRcAf",
-  "hash160": "4f59c49134ba043dc24a36e551be50eea6a46cb8"
+  "txid": "5237e3ed6fa8e5fcaf75b7c6d08cb78d83b8c7237da6fd3514e48dec0f744e50",
+  "sender": "Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU",
+  "hash160": "ca253ac9875464ddfb30f498c9e0e64bab7c6360"
 }
 
 ```
 
-Transaction: [5341c062196192b4af698adfc519723f70aa1a7c4ba41903d3eba39bcf2faffe](https://testexplorer.hydrachain.org/tx/5341c062196192b4af698adfc519723f70aa1a7c4ba41903d3eba39bcf2faffe)
+Transaction: [5237e3ed6fa8e5fcaf75b7c6d08cb78d83b8c7237da6fd3514e48dec0f744e50](https://testexplorer.hydrachain.org/tx/5237e3ed6fa8e5fcaf75b7c6d08cb78d83b8c7237da6fd3514e48dec0f744e50)
 
 
 
 # Function Details
 
-### [Main Contract](https://testexplorer.hydrachain.org/contract/e44757842cce82555716586aa83d6e522004c239/)
-
-```
-e44757842cce82555716586aa83d6e522004c239 💎HydraGem💎 [v8.3c-test] GEM 💎 [testnet]
-```
+### Main Contract: [💎 HYGEM 💎HydraGem💎 [v9.3a-test]](https://testexplorer.hydrachain.org/contract/f57944a55d1d95cb2fab513171f2230e68931f7b/) `f57944a55d1d95cb2fab513171f2230e68931f7b`
 
 ### Functions
 
@@ -201,10 +198,10 @@ e44757842cce82555716586aa83d6e522004c239 💎HydraGem💎 [v8.3c-test] GEM 💎 
     instead.
 
     A minimum payment is required for 🧱 to be minted, but 💫 is still minted when no payment is included or the amount paid is less than the `cost`.
-
     If the payment is less than the amount specified by the `cost()` function, the amount is held by the contract until additional payments meet the minimum `cost`.
-
     Any excess beyond the `cost` is then returned to the sender.
+
+    If there is no payment included but the caller is holding 🪙, they will be used to pay the minting cost instead.
 
 - ### `6a627842` `mint(address)`
 
@@ -227,8 +224,9 @@ e44757842cce82555716586aa83d6e522004c239 💎HydraGem💎 [v8.3c-test] GEM 💎 
     The current award value can be determined from the `value()` function.
 
 - ### `f088d547` `buy(address)`
+  ### `a6f2ae3a` `buy()`
 
-    Buy one 🧱 token from `address` for at least `price()` HYDRA included as payment.
+    Buy one 🧱 token from `address` (or `block.coinbase` of the current transaction) for at least `price()` HYDRA included as payment.
 
     Conditions must be met in order for the purchase to be allowed:
      - The buyer cannot be holding 🧱.
@@ -238,15 +236,17 @@ e44757842cce82555716586aa83d6e522004c239 💎HydraGem💎 [v8.3c-test] GEM 💎 
     Once these conditions are met, the HYDRA payment is sent to the reward pool
     and the 🧱 is transferred from the holder at `address` to the caller.
 
+    If no payment is included but the caller holds 🪙, they will be used to cover the buy price instead.
+
 - ### `be040fb0` `redeem()`
   ### `db006a75` `redeem(amount)`
 
-    Redeem `amount` (or all) of held 🪙 1:1 for HYDRA.
+    Redeem `amount` (or all) of held 🪙 for HYDRA, where 1🪙 = 0.001 HYDRA.
 
     The purpose of these tokens is to provide permanence to the game's reward history,
-    and are otherwise usable as normal tokens and collateral for HYDRA.
+    enable gameplay with tokens only, and are otherwise usable as normal tokens (which serves as collateral for HYDRA).
 
-    They can be bought directly from the `GEMCOIN` contract, traded on the DEX, and transferred.
+    They can be bought directly using the `coins()` function, traded on the DEX, and transferred.
     However, unlike normal tokens these cannot be burned.
 
 - ### `13faede6` `cost()`
@@ -261,10 +261,9 @@ e44757842cce82555716586aa83d6e522004c239 💎HydraGem💎 [v8.3c-test] GEM 💎 
 
     Get the current 🪙 reward value from burning one 💎.
 
-- ### `70a08231` `balanceOf(address)`
+- ### `22fcefbe` `coins()`
 
-    Get the balance of 💎 tokens associated with `address`.
-
+    Return 🪙 from paid HYDRA, with 1🪙 = 0.001 HYDRA.
 
 ## Generic Functions for All Contracts
 
@@ -272,9 +271,10 @@ All `HydraGem` contracts are tokens and share a common structure based from ERC2
 
 ### Auxiliary Contracts
 
-- `87b90d7cad0b9a28d69431d84169f23ce8f33318` [💎HydraGem💎 [v8.3c-test] MAGIC 💫 [testnet]](https://testexplorer.hydrachain.org/contract/87b90d7cad0b9a28d69431d84169f23ce8f33318/)
-- `4d8309ace4f0a62c6a137dcf61a72ba26ef7733a` [💎HydraGem💎 [v8.3c-test] BLOCK 🧱 [testnet]](https://testexplorer.hydrachain.org/contract/4d8309ace4f0a62c6a137dcf61a72ba26ef7733a/)
-- `445bdd15bff60371c55e59813b62bb1135f7ac31` [💎HydraGem💎 [v8.3c-test] GEMCOIN 🪙 [testnet]](https://testexplorer.hydrachain.org/contract/445bdd15bff60371c55e59813b62bb1135f7ac31/)
+- `54fa1d203231118b7e1d5a657079dbedcf15e0b7` [💫 MAGIC 💎HydraGem💎 [v9.3a-test]](https://testexplorer.hydrachain.org/contract/54fa1d203231118b7e1d5a657079dbedcf15e0b7/)
+- `c1722c727778c500b3440743cc4b47d8c9c3a1d1` [🧱 BLOCK 💎HydraGem💎 [v9.3a-test]](https://testexplorer.hydrachain.org/contract/c1722c727778c500b3440743cc4b47d8c9c3a1d1/)
+- `9894cbb77b7812ddc2973c3a66f1f8ef43f0ba0f` [🪙 GCOIN 💎HydraGem💎 [v9.3a-test]](https://testexplorer.hydrachain.org/contract/9894cbb77b7812ddc2973c3a66f1f8ef43f0ba0f/)
+- `a65154396fcb66b5603897ea31059584f0ba88c2` [🔥 FLAME 💎HydraGem💎 [v9.3a-test]](https://testexplorer.hydrachain.org/contract/a65154396fcb66b5603897ea31059584f0ba88c2/)
 
 ### Functions
 
@@ -286,6 +286,9 @@ All `HydraGem` contracts are tokens and share a common structure based from ERC2
 
 - ### `18160ddd` `totalSupply()`
   View returning the total supply of the called contract token.
+
+- ### `70a08231` `balanceOf(address)`
+  View returning the balance of contract tokens associated with `address`.
 
 - ### `a7509b83` `burned(address from)`
   View returning the amount of contract tokens burned by `from`.
