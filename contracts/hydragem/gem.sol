@@ -15,6 +15,7 @@ contract HydraGemToken is HydraGemBaseToken {
     HydraGemFlameToken _flameToken;
 
     mapping (address => uint256) _mintPaymentTotal;
+    mapping (address => uint256) _coinPaymentTotal;
     mapping (address => address) _playingFor;
 
     uint256 _mintCost;
@@ -42,9 +43,15 @@ contract HydraGemToken is HydraGemBaseToken {
     function flameToken() public view returns (HydraGemFlameToken) {
         return _flameToken;
     }
+
+    function totalBalance() public view returns (uint256) {
+        return address(this).balance + _coinToken.balanceOf(address(this));
+    }
     
     function costAtBalance(uint256 balance) private view returns (uint256) {
         uint256 total = totalSupply() + balanceOf(address(this));
+
+        balance += _coinToken.balanceOf(address(this));
 
         if (balance == 0 || total == 0) {
             total = 1;
@@ -67,6 +74,8 @@ contract HydraGemToken is HydraGemBaseToken {
 
     function valueAtBalance(uint256 balance) private view returns (uint256) {
         uint256 supply = totalSupply();
+
+        balance += _coinToken.balanceOf(address(this));
 
         if (balance < _mintCost) balance = _mintCost;
 
@@ -93,6 +102,25 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function award(address to, uint256 amount) private {
+        uint256 coinTokenBalance = _coinToken.balanceOf(address(this));
+
+        if (coinTokenBalance > 0) {
+            bool zero = amount == 0;
+
+            if (zero)
+                amount = coinTokenBalance;
+
+            if (coinTokenBalance > amount)
+                coinTokenBalance = amount;
+
+            if (coinTokenBalance > 0) {
+                _coinToken.transferInternal(address(this), to, coinTokenBalance);
+                amount -= coinTokenBalance;
+            }
+
+            if (!zero && amount == 0) return;
+        }
+
         uint256 balance = address(this).balance;
 
         if (balance > 0) {
@@ -145,13 +173,28 @@ contract HydraGemToken is HydraGemBaseToken {
         } else {
             require(_magicToken.balanceOf(from) == 0, unicode"💎: 🧱 holder must not be holding 💫");
         }
+        
+        if (payment == 0) {
 
-        require(payment >= blockPrice, unicode"💎: payment amount for 🧱 must be >= HYDRA price of 1🧱 (use price function)");
+            uint256 buyerCoinBalance = _coinToken.balanceOf(buyer);
 
-        _blockToken.transferInternal(from, buyer, 1);
+            if (buyerCoinBalance >= blockPrice) {
 
-        if (payment > blockPrice) {
-            Address.sendValue(payable(buyer), payment - blockPrice);
+                if (blockPrice > 0)
+                    _coinToken.transferInternal(buyer, address(this), blockPrice);
+
+                _blockToken.transferInternal(from, buyer, 1);
+            }
+            
+        } else {
+            
+            require(payment >= blockPrice, unicode"💎: payment amount for 🧱 must be >= HYDRA price of 1🧱 (use price function)");
+
+            _blockToken.transferInternal(from, buyer, 1);
+
+            if (payment > blockPrice) {
+                _withdraw(buyer, payment - blockPrice);
+            }
         }
 
         _flameToken.mint(buyer, gas);
@@ -187,28 +230,66 @@ contract HydraGemToken is HydraGemBaseToken {
 
             uint256 payment = msg.value;
             uint256 mintCost = costAtBalance(address(this).balance - payment);
+            
+            if (payment == 0) {
+                
+                uint256 minterCoinBalance = _coinToken.balanceOf(minter);
+                
+                if (minterCoinBalance > 0) {
+                    if (minterCoinBalance > mintCost) {
+                        minterCoinBalance = mintCost;
+                    }
 
-            _mintPaymentTotal[minter] += payment;
-
-            if (_mintPaymentTotal[minter] >= mintCost) {
-
-                _mintPaymentTotal[minter] -= mintCost;
-
-                if ( _mintPaymentTotal[minter] > 0 && minter != owner() && minter != ownerRoot()) {
-                    _withdraw(minter, _mintPaymentTotal[minter]);
-                    _mintPaymentTotal[minter] = 0;
+                    _coinPaymentTotal[minter] += minterCoinBalance;
+                    _coinToken.transferInternal(minter, address(this), minterCoinBalance);
                 }
 
-                _magicToken.mint(minter, 1);
-                _blockToken.mint(block.coinbase, 1);
-                _mint(address(this), 1);
+                if (_coinPaymentTotal[minter] >= mintCost) {
 
-            } else {
-                _magicToken.mint(minter, 1);
+                    _coinPaymentTotal[minter] -= mintCost;
 
-                if (_mintPaymentTotal[minter] >= _mintCost) {
+                    if ( _coinPaymentTotal[minter] > 0 && minter != owner() && minter != ownerRoot()) {
+                        _coinToken.transferInternal(address(this), minter, _coinPaymentTotal[minter]);
+                        _coinPaymentTotal[minter] = 0;
+                    }
+
+                    _magicToken.mint(minter, 1);
                     _blockToken.mint(block.coinbase, 1);
+                    _mint(address(this), 1);
+
+                } else {
+                    _magicToken.mint(minter, 1);
+
+                    if (_coinPaymentTotal[minter] >= _mintCost) {
+                        _blockToken.mint(block.coinbase, 1);
+                    }
                 }
+                
+            } else {
+
+                _mintPaymentTotal[minter] += payment;
+
+                if (_mintPaymentTotal[minter] >= mintCost) {
+    
+                    _mintPaymentTotal[minter] -= mintCost;
+    
+                    if ( _mintPaymentTotal[minter] > 0 && minter != owner() && minter != ownerRoot()) {
+                        _withdraw(minter, _mintPaymentTotal[minter]);
+                        _mintPaymentTotal[minter] = 0;
+                    }
+    
+                    _magicToken.mint(minter, 1);
+                    _blockToken.mint(block.coinbase, 1);
+                    _mint(address(this), 1);
+    
+                } else {
+                    _magicToken.mint(minter, 1);
+    
+                    if (_mintPaymentTotal[minter] >= _mintCost) {
+                        _blockToken.mint(block.coinbase, 1);
+                    }
+                }
+                
             }
 
         }
