@@ -54,10 +54,6 @@ contract HydraGemCoinToken is HydraGemBaseToken {
         _redeem(_msgSender(), amount);
     }
 
-    function redeem(address seller) private {
-        _redeem(seller, 0);
-    }
-
     function redeemInternal(address seller, uint256 amount) public onlyOwners {
         return _redeem(seller, amount);
     }

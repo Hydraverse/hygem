@@ -8,6 +8,7 @@ contract HydraGemFlameToken is HydraGemBaseToken {
     HydraGemCoinToken _coinToken;
 
     uint256 _max = 1000000;
+    uint256 _residual;
 
     constructor(HydraGemCoinToken coinToken_, address owner_)
         HydraGemBaseToken(unicode"FLAME 🔥", unicode"🔥", coinToken_.gemToken(), owner_)
@@ -15,7 +16,7 @@ contract HydraGemFlameToken is HydraGemBaseToken {
         _coinToken = coinToken_;
     }
 
-    function max() public returns (uint256) {
+    function max() public view returns (uint256) {
         return _max;
     }
 
@@ -23,12 +24,17 @@ contract HydraGemFlameToken is HydraGemBaseToken {
         _max = max_;
     }
 
+    function residual() public view returns (uint256) {
+        return _residual;
+    }
+
     receive() external payable virtual override {
+        uint256 gas = gasleft();
 
         if (msg.value > 0)
             _withdraw(address(_coinToken), msg.value);
 
-        mint(_msgSender(), gasleft());
+        mint(_msgSender(), gas);
     }
 
     function mint() public {
@@ -40,7 +46,7 @@ contract HydraGemFlameToken is HydraGemBaseToken {
 
         if (amount == 0) amount = gas;
 
-        require(amount >= gasleft() || amount > _max, unicode"🔥: mint() should be called with starting gas value");
+        require(amount >= gasleft() && amount <= _max, unicode"🔥: mint() should be called with starting gas value or zero");
 
         if (to == address(0)) to = _msgSender();
 
@@ -48,6 +54,8 @@ contract HydraGemFlameToken is HydraGemBaseToken {
 
         if (gas > 0)
             _mint(to, gas);
+
+        _residual += gas - gasleft();
     }
 
     function redeemable() public view returns (bool) {
@@ -58,15 +66,15 @@ contract HydraGemFlameToken is HydraGemBaseToken {
         if (redeemer == address(0))
             redeemer = _msgSender();
         
-        return redeemable() && balanceOf(redeemer) > 0;
+        return (balanceOf(redeemer) > 0) && redeemable();
     }
 
     function redeem() public {
-        return redeem(_msgSender(), 0);
+        return _redeem(_msgSender(), 0);
     }
 
     function redeem(uint256 amount) public {
-        return redeem(_msgSender(), amount);
+        return _redeem(_msgSender(), amount);
     }
 
     function tryRedeem() public {
@@ -74,24 +82,26 @@ contract HydraGemFlameToken is HydraGemBaseToken {
     }
 
     function tryRedeem(uint256 amount) public {
-        return tryRedeem(_msgSender(), amount);
-    }
-
-    function tryRedeem(address redeemer) public onlyOwners {
-        return tryRedeem(redeemer, 0);
-    }
-
-    function tryRedeem(address redeemer, uint256 amount) public onlyOwners {
-        if (redeemable(redeemer)) {
-            return redeem(redeemer, amount);
+        if (redeemable(_msgSender())) {
+            return _redeem(_msgSender(), amount);
         }
     }
 
-    function redeem(address redeemer) public onlyOwners {
-        return redeem(redeemer, 0);
+    function tryRedeemInternal(address redeemer) public onlyOwners {
+        return tryRedeemInternal(redeemer, 0);
     }
 
-    function redeem(address redeemer, uint256 amount) public onlyOwners {
+    function tryRedeemInternal(address redeemer, uint256 amount) public onlyOwners {
+        if (redeemable(redeemer)) {
+            return _redeem(redeemer, amount);
+        }
+    }
+
+    function redeemInternal(address redeemer, uint256 amount) public onlyOwners {
+        return _redeem(redeemer, amount);
+    }
+
+    function _redeem(address redeemer, uint256 amount) private {
         if (redeemer == address(0))
             redeemer = _msgSender();
 
@@ -138,7 +148,7 @@ contract HydraGemFlameToken is HydraGemBaseToken {
 
             if (balance > 0) {
                 burnFrom(redeemer, balance);
-                withdraw(address(_coinToken), balance);
+                _withdraw(address(_coinToken), balance);
                 coinBalance = _coinToken.balanceOf(address(this));
                 require(coinBalance >= balance, unicode"🔥: Could not properly acquire 🪙 liquidity");
                 _coinToken.transferInternal(address(this), redeemer, coinBalance);
