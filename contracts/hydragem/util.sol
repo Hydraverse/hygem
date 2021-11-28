@@ -66,33 +66,19 @@ abstract contract ERC20OwnerLiquidator is ERC20, ERC20SimpleTrackedBurner, DualO
 
 abstract contract OwnerAccountant is Context {
 
-    function withdraw(address to, uint256 amount) internal {
+    function _withdraw(address to, uint256 amount) internal {
         return Address.sendValue(payable(to), amount);
     }
 
-    function withdraw(address to) internal {
-        return Address.sendValue(payable(to), address(this).balance);
+    function _withdraw(address to) internal {
+        return _withdraw(to, address(this).balance);
     }
 
-    function withdraw(uint256 amount) internal {
-        return Address.sendValue(payable(_msgSender()), amount);
+    function _withdraw(uint256 amount) internal {
+        return _withdraw(_msgSender(), amount);
     }
 
-    function withdraw() internal {
-        return Address.sendValue(payable(_msgSender()), address(this).balance);
-    }
-
-    function forward() internal {
-        return forward(_msgSender());
-    }
-
-    function forward(address to) internal {
-        return forward(to, address(this).balance);
-    }
-
-    function forward(address to, uint256 amount) internal {
-        if (to != address(this) && amount > 0) {
-            return withdraw(to, amount);
-        }
+    function _withdraw() internal {
+        return _withdraw(_msgSender(), address(this).balance);
     }
 }

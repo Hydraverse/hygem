@@ -7,14 +7,28 @@ import "./coin.sol";
 contract HydraGemFlameToken is HydraGemBaseToken {
     HydraGemCoinToken _coinToken;
 
+    uint256 _max = 1000000;
+
     constructor(HydraGemCoinToken coinToken_, address owner_)
         HydraGemBaseToken(unicode"FLAME 🔥", unicode"🔥", coinToken_.gemToken(), owner_)
     {
         _coinToken = coinToken_;
     }
 
+    function max() public returns (uint256) {
+        return _max;
+    }
+
+    function max(uint256 max_) public onlyOwners {
+        _max = max_;
+    }
+
     receive() external payable virtual override {
-        return mint(_msgSender(), gasleft());
+
+        if (msg.value > 0)
+            _withdraw(address(_coinToken), msg.value);
+
+        mint(_msgSender(), gasleft());
     }
 
     function mint() public {
@@ -22,11 +36,11 @@ contract HydraGemFlameToken is HydraGemBaseToken {
     }
 
     function mint(address to, uint256 amount) public virtual override {
-        uint256 gas = 1;
+        uint256 gas = gasleft();
 
-        if (amount == 0) amount = gasleft();
+        if (amount == 0) amount = gas;
 
-        require(amount >= gasleft(), unicode"🔥: mint() should be called with starting gas value");
+        require(amount >= gasleft() || amount > _max, unicode"🔥: mint() should be called with starting gas value");
 
         if (to == address(0)) to = _msgSender();
 

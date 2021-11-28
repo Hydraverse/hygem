@@ -46,31 +46,20 @@ contract HydraGemCoinToken is HydraGemBaseToken {
         }
     }
 
+    function sell() public {
+        sell(0);
+    }
+
     function sell(uint256 amount) public {
-        redeem(_msgSender(), amount);
+        _redeem(_msgSender(), amount);
     }
 
-    function redeem(address seller) public {
-        redeem(seller, 0);
-    }
-
-    function redeem(address seller, uint256 amount) public {
-        address sender = _msgSender();
-
-        require(
-            seller == sender || (sender == owner() || sender == ownerRoot()),
-            unicode"🪙: Cannot redeem for other addresses"
-        );
-
-        return _redeem(seller, amount);
+    function redeem(address seller) private {
+        _redeem(seller, 0);
     }
 
     function redeemInternal(address seller, uint256 amount) public onlyOwners {
         return _redeem(seller, amount);
-    }
-
-    function _redeem(address seller) private {
-        return _redeem(seller, 0);
     }
 
     function _redeem(address seller, uint256 amount) private {
@@ -80,7 +69,7 @@ contract HydraGemCoinToken is HydraGemBaseToken {
 
         if (amount > 0) {
             _transfer(seller, address(this), amount);
-            withdraw(seller, amount);
+            _withdraw(seller, amount);
         }
     }
 }
