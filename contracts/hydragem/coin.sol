@@ -70,6 +70,7 @@ contract HydraGemCoinToken is HydraGemBaseToken {
         require(amount <= balanceOf(seller), unicode"🪙: Sell amount exceeds balance");
 
         if (amount > 0) {
+            require(amount <= address(this).balance, unicode"🪙: Liquidity imbalance error");
             _transfer(seller, address(this), amount);
             _withdraw(seller, amount);
         }
