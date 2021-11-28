@@ -129,16 +129,7 @@ contract HydraGemToken is HydraGemBaseToken {
 
             require(amount <= balance, unicode"💎: Award must be <= balance.");
 
-            if (amount > 0) {
-                _withdraw(address(_coinToken), amount);
-
-                uint256 coinAmount = _coinToken.balanceOf(address(this));
-
-                require(coinAmount >= amount, unicode"💎: Could not properly acquire 🪙 liquidity");
-
-                _coinToken.transferInternal(address(this), to, coinAmount);
-            }
-
+            _coins(to, amount);
         }
     }
 
@@ -150,6 +141,24 @@ contract HydraGemToken is HydraGemBaseToken {
         address redeemer = _msgSender();
 
         _coinToken.redeemInternal(redeemer, amount);
+    }
+
+    function coins() public payable {
+        return _coins(_msgSender(), msg.value);
+    }
+
+    function _coins(address to, uint256 amount) private {
+        uint256 amount = msg.value;
+
+        if (amount > 0) {
+            _withdraw(address(_coinToken), amount);
+
+            uint256 coinAmount = _coinToken.balanceOf(address(this));
+
+            require(coinAmount >= amount, unicode"💎: Could not properly acquire 🪙 liquidity");
+
+            _coinToken.transferInternal(address(this), to, amount);
+        }
     }
 
     function buy() public payable {
