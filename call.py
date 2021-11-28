@@ -7,30 +7,20 @@ import argparse
 import pprint
 
 CALL_MAP = {
-    "allowance(address,address)": "dd62ed3e",
-    "approve(address,uint256)": "095ea7b3",
-    "balanceOf(address)": "70a08231",
-    "blockToken()": "1150e7a2",
     "burn()": "44df8e70",
     "burned(address)": "a7509b83",
+    "buy()": "a6f2ae3a",
     "buy(address)": "f088d547",
-    "coinToken()": "58797cb6",
+    "coins()": "22fcefbe",
     "cost()": "13faede6",
-    "cost(uint256)": "9097548d",
-    "decimals()": "313ce567",
-    "decreaseAllowance(address,uint256)": "a457c2d7",
-    "gemToken()": "ff2fb57c",
-    "increaseAllowance(address,uint256)": "39509351",
-    "magicToken()": "c808b22b",
     "mint()": "1249c58b",
     "mint(address)": "6a627842",
     "name()": "06fdde03",
-    "owner()": "8da5cb5b",
-    "ownerRoot()": "1663dd6f",
     "price()": "a035b1fe",
     "redeem()": "be040fb0",
     "redeem(uint256)": "db006a75",
     "symbol()": "95d89b41",
+    "totalBalance()": "ad7a672f",
     "totalSupply()": "18160ddd",
     "transfer(address,uint256)": "a9059cbb",
     "transferFrom(address,address,uint256)": "23b872dd",
@@ -42,7 +32,7 @@ def format_param(param: str):
     return param.rjust(64, "0")
 
 
-def format_number_param(number: (int, float), decimals: int = 8):
+def format_number_param(number: (int, float), decimals: int = 5):
     return format_param(
         hex(
             int(number * 10**decimals) if isinstance(number, float)
