@@ -11,7 +11,7 @@ contract HydraGemFlameToken is HydraGemBaseToken {
     uint256 _residual;
 
     constructor(HydraGemCoinToken coinToken_, address owner_)
-        HydraGemBaseToken(unicode"FLAME 🔥", unicode"🔥", coinToken_.gemToken(), owner_)
+        HydraGemBaseToken(unicode"🔥 FLAME", unicode"🔥", coinToken_.gemToken(), owner_)
     {
         _coinToken = coinToken_;
     }

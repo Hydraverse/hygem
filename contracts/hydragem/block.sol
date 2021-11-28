@@ -6,7 +6,7 @@ import "./base.sol";
 
 contract HydraGemBlockToken is HydraGemBaseToken {
 
-    constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"BLOCK 🧱", unicode"🧱", gemToken_, owner_) {
+    constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"🧱 BLOCK", unicode"🧱", gemToken_, owner_) {
     }
 
     function liquidate() public virtual override onlyOwners {

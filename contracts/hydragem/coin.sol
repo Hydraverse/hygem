@@ -8,7 +8,7 @@ contract HydraGemCoinToken is HydraGemBaseToken {
 
     uint8 _decimals_ = 5;
 
-    constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"GEMCOIN 🪙", unicode"🪙", gemToken_, owner_) {
+    constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"🪙 GCOIN", unicode"🪙", gemToken_, owner_) {
     }
 
     function decimals() public view virtual override returns (uint8) {

@@ -6,6 +6,6 @@ import "./base.sol";
 
 contract HydraGemMagicToken is HydraGemBaseToken {
 
-    constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"MAGIC 💫", unicode"💫", gemToken_, owner_) {
+    constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"💫 MAGIC", unicode"💫", gemToken_, owner_) {
     }
 }
