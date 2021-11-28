@@ -138,13 +138,21 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function redeem(uint256 amount) public {
+        uint256 gas = 0; gas = gasleft();
+
         address redeemer = _msgSender();
 
         _coinToken.redeemInternal(redeemer, amount);
+
+        _flameToken.mint(buyer, gas);
     }
 
     function coins() public payable {
-        return _coins(_msgSender(), msg.value);
+        uint256 gas = 0; gas = gasleft();
+
+        _coins(_msgSender(), msg.value);
+
+        _flameToken.mint(buyer, gas);
     }
 
     function _coins(address to, uint256 amount) private {
