@@ -55,7 +55,9 @@ contract HydraGemFlameToken is HydraGemBaseToken {
         if (gas > 0)
             _mint(to, gas);
 
-        _residual += gas - gasleft();
+        gas -= gasleft();
+
+        _residual += gas;
     }
 
     function redeemable() public view returns (bool) {

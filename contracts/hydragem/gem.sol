@@ -117,12 +117,12 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function redeem() public {
-        _gas = gasleft();
+        uint256 __gas = 1; __gas = gasleft(); _gas = __gas;
         return redeem(0);
     }
 
     function redeem(uint256 amount) public {
-        if (_gas == 0) _gas = gasleft();
+        if (_gas == 0) { uint256 __gas = 1; __gas = gasleft(); _gas = __gas; }
         address redeemer = _msgSender();
 
         _coinToken.redeemInternal(redeemer, amount);
@@ -132,12 +132,12 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function buy() public payable {
-        _gas = gasleft();
+        uint256 __gas = 1; __gas = gasleft(); _gas = __gas;
         return buy(block.coinbase);
     }
 
     function buy(address from) public payable {
-        if (_gas == 0) _gas = gasleft();
+        if (_gas == 0) { uint256 __gas = 1; __gas = gasleft(); _gas = __gas; }
 
         address buyer = _msgSender();
         uint256 payment = msg.value;
@@ -167,7 +167,7 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function mint(address player) payable public {
-        _gas = gasleft();
+        uint256 __gas = 1; __gas = gasleft(); _gas = __gas;
         address staker = _msgSender();
 
         require(player != address(0), unicode"💎: Player cannot be the zero address.");
@@ -179,7 +179,7 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function mint() payable public {
-        if (_gas == 0) _gas = gasleft();
+        if (_gas == 0) { uint256 __gas = 1; __gas = gasleft(); _gas = __gas; }
         address minter = _msgSender();
 
         if (minter == block.coinbase) {
@@ -228,7 +228,7 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function burn() public virtual override {
-        if (_gas == 0) _gas = gasleft();
+        if (_gas == 0) { uint256 __gas = 1; __gas = gasleft(); _gas = __gas; }
         address burner = _msgSender();
         uint256 amountGem = balanceOf(burner);
         uint256 amountMagic = _magicToken.balanceOf(burner);
