@@ -41,7 +41,7 @@ Note that HYGEM cannot be burned until the player has burned all available MAGIC
 
 Use `sendtocontract` to access all below functions, and `callcontract` for views.
 
-## Mint MAGIC
+## Mint MAGIC💫
 
 This transaction sends 0.11 HYDRA to the game contract.
 The initial cost of minting starts at 1 GEMCOIN, which as a value of 0.01 HYDRA.
@@ -63,7 +63,7 @@ Any amount of HYDRA beyond the mint cost is returned to the sender.
 The transaction can be located on the [Testnet Explorer](https://testexplorer.hydrachain.org/tx/407fa9ac62c5b40eea640a4ad2889a654204d55a2fb19a056b0212ff4c051643)
 to determine the BLOCK🧱 winner. 
 
-## Buy a BLOCK
+## Buy BLOCK🧱
 
 This example uses the purchased GCOIN from the above transaction to pay for the BLOCK.
 
@@ -111,9 +111,9 @@ halo@blade:halos ֍ ./call.py burn
 44df8e70
 ```
 
-## Burn MAGIC+BLOCK to get HYGEM
+## Burn MAGIC💫 + BLOCK🧱 to get HYGEM 💎
 
-Now that 1 BLOCK🧱 has been bought, 1 HYGEM💎 can be obtained by calling `burn`.
+Now that 1 BLOCK has been bought, 1 HYGEM can be obtained by calling `burn`.
 
 ```shell
 $ ./call.py burn
@@ -127,7 +127,7 @@ $ hydra-cli -testnet sendtocontract $GEM 44df8e70 0 250000 $ADDR  # burn()
 ```
 Transaction: [ae3574d14c2d0a1ed2880b7b3afa14248a9b03c577c7b5fd07c91c647c81b868](https://testexplorer.hydrachain.org/tx/ae3574d14c2d0a1ed2880b7b3afa14248a9b03c577c7b5fd07c91c647c81b868)
 
-## Burn HYGEM for GCOIN award:
+## Burn HYGEM💎 for GCOIN🪙 award:
 
 After obtaining HYGEM, it can be held, traded or burned to receive GCOINs.
 
@@ -142,9 +142,9 @@ $ hydra-cli -testnet sendtocontract $GEM 44df8e70 0 250000 $ADDR  # burn()
 Transaction: [79420b8512128971fc9e27b4b5a5b2aeb154356054e48caacb799979dc87ab9b](https://testexplorer.hydrachain.org/tx/79420b8512128971fc9e27b4b5a5b2aeb154356054e48caacb799979dc87ab9b)
 
 
-## Redeem & exchange GCOIN with HYDRA:
+## Redeem & exchange GCOIN🪙 with HYDRA:
 
-### GCOIN🪙 always has a 100:1 value with HYDRA and available liquidity to exchange tokens.
+### GCOIN always has a 100:1 value with HYDRA and available liquidity to exchange tokens.
 
 ```shell
 $ CALL="$(./call.py 'redeem(uint256)' 1.0)"; echo $CALL
@@ -174,7 +174,7 @@ $ hydra-cli -testnet sendtocontract "$GEM" "$CALL" 0 250000 $ADDR
 
 Transaction: [6bf6645e4eafece0683d2640051c802a5ac40e4fcd4fa1e764440e5b4ca0a399](https://testexplorer.hydrachain.org/tx/6bf6645e4eafece0683d2640051c802a5ac40e4fcd4fa1e764440e5b4ca0a399)
 
-### Finally, to buy GCOIN🪙 with HYDRA:
+### Finally, to buy GCOIN using HYDRA:
 
 ```shell
 $ CALL="$(./call.py coins)"; echo $CALL
@@ -279,10 +279,10 @@ All `HydraGem` contracts are tokens and share a common structure based from ERC2
 
 ### Auxiliary Contracts
 
-- `3d34588f9d115ab01cbbb133a8b0b7b56dd5c3df` [💫 MAGIC 💎HydraGem💎 [v9.3a-test]](https://testexplorer.hydrachain.org/contract/3d34588f9d115ab01cbbb133a8b0b7b56dd5c3df/)
-- `0b1d3dafe4fc1ae725090b417e1532045a3da6df` [🧱 BLOCK 💎HydraGem💎 [v9.3a-test]](https://testexplorer.hydrachain.org/contract/0b1d3dafe4fc1ae725090b417e1532045a3da6df/)
-- `220a2a7f47aef7f0ed38697264c623f5ce86c32d` [🪙 GCOIN 💎HydraGem💎 [v9.3a-test]](https://testexplorer.hydrachain.org/contract/220a2a7f47aef7f0ed38697264c623f5ce86c32d/)
-- `28478e53763fa7745254fc8dbedf6ca18906709d` [🔥 FLAME 💎HydraGem💎 [v9.3a-test]](https://testexplorer.hydrachain.org/contract/28478e53763fa7745254fc8dbedf6ca18906709d/)
+- `3d34588f9d115ab01cbbb133a8b0b7b56dd5c3df` [💫 MAGIC 💎HydraGem💎 [v9.4a-test]](https://testexplorer.hydrachain.org/contract/3d34588f9d115ab01cbbb133a8b0b7b56dd5c3df/)
+- `0b1d3dafe4fc1ae725090b417e1532045a3da6df` [🧱 BLOCK 💎HydraGem💎 [v9.4a-test]](https://testexplorer.hydrachain.org/contract/0b1d3dafe4fc1ae725090b417e1532045a3da6df/)
+- `220a2a7f47aef7f0ed38697264c623f5ce86c32d` [🪙 GCOIN 💎HydraGem💎 [v9.4a-test]](https://testexplorer.hydrachain.org/contract/220a2a7f47aef7f0ed38697264c623f5ce86c32d/)
+- `28478e53763fa7745254fc8dbedf6ca18906709d` [🔥 FLAME 💎HydraGem💎 [v9.4a-test]](https://testexplorer.hydrachain.org/contract/28478e53763fa7745254fc8dbedf6ca18906709d/)
 
 ### Functions
 
