@@ -38,15 +38,15 @@ Replace `ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU` with your own address or leave
 ```shell
 $ GEM=f57944a55d1d95cb2fab513171f2230e68931f7b
 $ ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU
-$ hydra-cli -testnet sendtocontract $GEM 1249c58b 0.001 250000 $ADDR  # mint()
+$ hydra-cli -testnet sendtocontract $GEM 1249c58b 0.101 350000 $ADDR  # mint()
 {
-  "txid": "f3eda80eab53e95109a3c02f1d011f82208be45f7e17dc03ac7edcc6d1bb7162",
+  "txid": "8c728ba7e9c3bbe71d7be2437dac3b0e5d3b9f1a34bf8f77daaca09a7b6c0426",
   "sender": "Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU",
   "hash160": "ca253ac9875464ddfb30f498c9e0e64bab7c6360"
 }
 ```
 Any amount of HYDRA beyond the mint cost is returned to the sender.
-The transaction can be located on the [Testnet Explorer](https://testexplorer.hydrachain.org/tx/f3eda80eab53e95109a3c02f1d011f82208be45f7e17dc03ac7edcc6d1bb7162)
+The transaction can be located on the [Testnet Explorer](https://testexplorer.hydrachain.org/tx/8c728ba7e9c3bbe71d7be2437dac3b0e5d3b9f1a34bf8f77daaca09a7b6c0426)
 to determine the 🧱 winner. 
 
 ### Example of buying one 🧱 from another holder at the queried price:

@@ -104,7 +104,7 @@ contract HydraGemToken is HydraGemBaseToken {
 
         value_ <<= 127; b <<= 128; g <<= 128;
 
-        value_ -= ((value_ * b) / (b + g)) >> 128;
+        value_ = (value_ - ((value_ * b) / (b + g))) >> 128;
 
         return (value_ < _mintCost) ? _mintCost : value_;
     }
