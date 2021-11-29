@@ -36,11 +36,11 @@ Use `sendtocontract` to access all below functions, and `callcontract` for views
 Replace `ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU` with your own address or leave blank to use the default address.
 
 ```shell
-$ GEM=c5ef1cedaf873005c2c7929282789bbd4435dba5
+$ GEM=ffee816aeffb4bb88ac5927006c03f4b3a29d363
 $ ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU
-$ hydra-cli -testnet sendtocontract $GEM 1249c58b 0.101 350000 $ADDR  # mint()
+$ hydra-cli -testnet sendtocontract $GEM 1249c58b 0.11 350000 $ADDR  # mint()
 {
-  "txid": "c9a44c4854fea3fba42bf94ff1f439f588be24aaf0fbccffa601fd5ca43470b7",
+  "txid": "2851cf911344ed3e2007a9e6f31ec184dadda3cd65b965ba71e0e0cbd2b31a75",
   "sender": "Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU",
   "hash160": "ca253ac9875464ddfb30f498c9e0e64bab7c6360"
 }
