@@ -47,58 +47,85 @@ contract HydraGemToken is HydraGemBaseToken {
     function totalBalance() public view returns (uint256) {
         return address(this).balance + _coinToken.balanceOf(address(this));
     }
-    
-    function costAtBalance(uint256 balance) private view returns (uint256) {
-        uint256 total = totalSupply() + balanceOf(address(this));
 
-        balance += _coinToken.balanceOf(address(this));
-
-        if (balance == 0 || total == 0) {
-            total = 1;
-        }
-
-        balance += _mintCost;
-
-        balance /= total;
-
-        return balance > _mintCost ? balance : _mintCost;
-    }
-
-    function cost() public view returns (uint256) {
-        return costAtBalance(address(this).balance);
-    }
-
-    function cost(uint256 amount) public onlyOwners {
+    function __cost(uint256 amount) public onlyOwners {
         _mintCost = amount;
     }
 
-    function valueAtBalance(uint256 balance) private view returns (uint256) {
-        uint256 supply = totalSupply();
-
-        balance += _coinToken.balanceOf(address(this));
-
-        if (balance < _mintCost) balance = _mintCost;
-
-        if (supply <= 1) return balance;
-
-        balance /= supply;
-        
-        return balance > _mintCost ? balance : _mintCost;
+    function cost() public view returns (uint256) {
+        return _cost();
     }
-    
+
     function value() public view returns (uint256) {
-        return valueAtBalance(address(this).balance);
-    }
-
-    function priceAtBalance(uint256 balance) private view returns (uint256) {
-        return valueAtBalance(balance + _mintCost);
+        return _value();
     }
 
     function price() public view returns (uint256) {
-        return priceAtBalance(address(this).balance);
+        return _price();
     }
 
-    receive() external payable virtual override onlyOwners {
+    function _value() private view returns (uint256) {
+        return _value(0);
+    }
+
+    function _value(uint256 payment) private view returns (uint256) {
+        address _addr = address(this);
+        uint256 balance = _addr.balance;
+        uint256 coinBalance = _coinToken.balanceOf(_addr);
+        uint256 supply = totalSupply();
+
+        require(payment <= balance, unicode"💎: [_value] payment cannot exceed total balance");
+
+        balance -= payment;
+        balance += coinBalance;
+
+        return (
+            balance == 0
+            ? 0
+            : (
+                supply == 0
+                ? balance
+                : (((balance << 128) / (supply << 128)) >> 128)
+            )
+        );
+    }
+
+    function _cost() private view returns (uint256) {
+        return _cost(0);
+    }
+
+    function _cost(uint256 payment) private view returns (uint256) {
+        uint256 value_ = _value(payment);
+        uint256 b = _blockToken.totalSupply();
+        uint256 g = totalSupply();
+
+        if (value_ < _mintCost || b == 0 || g == 0)
+            return _mintCost;
+
+        value_ <<= 127; b <<= 128; g <<= 128;
+
+        value_ -= ((value_ * b) / (b + g)) >> 128;
+
+        return (value_ < _mintCost) ? _mintCost : value_;
+    }
+
+    function _price() private view returns (uint256) {
+        return _price(0);
+    }
+
+    function _price(uint256 payment) private view returns (uint256) {
+        uint256 price_ = _value(payment) << 1;
+        uint256 cost_ = _cost(payment) << 1;
+
+        return (
+            price_ < cost_
+            ? cost_
+            : (price_ - cost_)
+        );
+    }
+
+    receive() external payable virtual override {
+        return mint();
     }
 
     function award(address to, uint256 amount) private {
@@ -180,7 +207,7 @@ contract HydraGemToken is HydraGemBaseToken {
         require(_magicToken.balanceOf(buyer) > 0, unicode"💎: 🧱 buyer must be holding 💫");
         require(_blockToken.balanceOf(from) >= 1, unicode"💎: 🧱 holder has insufficient 🧱 balance");
 
-        uint256 blockPrice = priceAtBalance(address(this).balance - payment);
+        uint256 blockPrice = _price(payment);
 
         if (_playingFor[from] == buyer) {
             blockPrice = 0;
@@ -207,7 +234,7 @@ contract HydraGemToken is HydraGemBaseToken {
             _blockToken.transferInternal(from, buyer, 1);
 
             if (payment > blockPrice) {
-                _withdraw(buyer, payment - blockPrice);
+                _coins(buyer, payment - blockPrice);
             }
         }
 
@@ -243,7 +270,7 @@ contract HydraGemToken is HydraGemBaseToken {
         } else {
 
             uint256 payment = msg.value;
-            uint256 mintCost = costAtBalance(address(this).balance - payment);
+            uint256 mintCost = _cost(payment);
             
             if (payment == 0) {
                 
@@ -288,7 +315,7 @@ contract HydraGemToken is HydraGemBaseToken {
                     _mintPaymentTotal[minter] -= mintCost;
     
                     if ( _mintPaymentTotal[minter] > 0 && minter != owner() && minter != ownerRoot()) {
-                        _withdraw(minter, _mintPaymentTotal[minter]);
+                        _coins(minter, _mintPaymentTotal[minter]);
                         _mintPaymentTotal[minter] = 0;
                     }
     
@@ -346,7 +373,7 @@ contract HydraGemToken is HydraGemBaseToken {
             if (amountGem > 0)  {
                 amountGem = 1; // Only burn one at a time.
 
-                uint256 payoutPerGem = value();
+                uint256 payoutPerGem = _value();
 
                 if (payoutPerGem > 0) {
 
