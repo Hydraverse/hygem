@@ -69,9 +69,8 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function _value(uint256 sub, uint256 add) private view returns (uint256) {
-        address _addr = address(this);
-        uint256 balance = _addr.balance;
-        uint256 coinBalance = _coinToken.balanceOf(_addr);
+        uint256 balance = address(this).balance;
+        uint256 coinBalance = _coinToken.balanceOf(address(this));
         uint256 supply = 1 + ((totalSupply() + _blockToken.totalSupply()) >> 1);
 
         require(sub <= balance, unicode"💎: [_value] payment cannot exceed total balance");
@@ -80,7 +79,11 @@ contract HydraGemToken is HydraGemBaseToken {
         balance += add;
         balance += coinBalance;
 
-        return (balance << 128) / (supply << 128);
+        return (
+            balance == 0
+            ? 0
+            : (balance << 128) / (supply << 128))
+        ;
     }
 
     function _cost() private view returns (uint256) {
@@ -108,13 +111,13 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function _price(uint256 payment) private view returns (uint256) {
-        uint256 price_ = _value(payment, _mintCost * 2);
+        uint256 value_ = _value(payment, _mintCost * 2);
         uint256 cost_ = _cost(payment, _mintCost);
 
         return (
-            price_ < cost_
+            value_ < cost_
             ? cost_
-            : (price_ - cost_)
+            : (value_ - cost_)
         );
     }
 
@@ -246,7 +249,7 @@ contract HydraGemToken is HydraGemBaseToken {
         if (minter == block.coinbase) {
             // What luck! Pay out half of the entire reward pool immediately instead of doing the usual.
 
-            award(minter, address(this).balance >> 1);
+            award(minter, totalBalance() >> 1);
 
             // Also burn half of the held gems if holding more than one.
             uint256 gemCacheBalance = balanceOf(address(this));
