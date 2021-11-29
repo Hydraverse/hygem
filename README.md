@@ -36,17 +36,17 @@ Use `sendtocontract` to access all below functions, and `callcontract` for views
 Replace `ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU` with your own address or leave blank to use the default address.
 
 ```shell
-$ GEM=f57944a55d1d95cb2fab513171f2230e68931f7b
+$ GEM=c5ef1cedaf873005c2c7929282789bbd4435dba5
 $ ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU
 $ hydra-cli -testnet sendtocontract $GEM 1249c58b 0.101 350000 $ADDR  # mint()
 {
-  "txid": "0bea03a73c0c0b83721bb19b56d0dd0b78e55f3b4edf23945ba73d16fd5fffbb",
+  "txid": "c9a44c4854fea3fba42bf94ff1f439f588be24aaf0fbccffa601fd5ca43470b7",
   "sender": "Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU",
   "hash160": "ca253ac9875464ddfb30f498c9e0e64bab7c6360"
 }
 ```
 Any amount of HYDRA beyond the mint cost is returned to the sender.
-The transaction can be located on the [Testnet Explorer](https://testexplorer.hydrachain.org/tx/0bea03a73c0c0b83721bb19b56d0dd0b78e55f3b4edf23945ba73d16fd5fffbb)
+The transaction can be located on the [Testnet Explorer](https://testexplorer.hydrachain.org/tx/c9a44c4854fea3fba42bf94ff1f439f588be24aaf0fbccffa601fd5ca43470b7)
 to determine the 🧱 winner. 
 
 ### Example of buying one 🧱 from another holder at the queried price:

@@ -25,7 +25,7 @@ contract HydraGemToken is HydraGemBaseToken {
         _blockToken = new HydraGemBlockToken(this, owner());
         _coinToken = new HydraGemCoinToken(this, owner());
         _flameToken = new HydraGemFlameToken(_coinToken, owner());
-        _mintCost = 10 ** 8 / 1000;
+        _mintCost = 10 ** 6 / 1000;
     }
 
     function magicToken() public view returns (HydraGemMagicToken) {
@@ -53,11 +53,11 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function cost() public view returns (uint256) {
-        return _cost(0);
+        return _cost(0, 0);
     }
 
     function value() public view returns (uint256) {
-        return _value(0);
+        return _value(0, 0);
     }
 
     function price() public view returns (uint256) {
@@ -65,37 +65,34 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function _value() private view returns (uint256) {
-        return _value(0);
+        return _value(0, 0);
     }
 
-    function _value(uint256 payment) private view returns (uint256) {
+    function _value(uint256 sub, uint256 add) private view returns (uint256) {
         address _addr = address(this);
         uint256 balance = _addr.balance;
         uint256 coinBalance = _coinToken.balanceOf(_addr);
-        uint256 supply = totalSupply();
+        uint256 supply = 1 + (totalSupply() + _blockToken.totalSupply()) >> 1;
 
-        require(payment <= balance, unicode"💎: [_value] payment cannot exceed total balance");
+        require(sub <= balance, unicode"💎: [_value] payment cannot exceed total balance");
 
-        balance -= payment;
+        balance -= sub;
+        balance += add;
         balance += coinBalance;
 
-        return (
-            balance == 0
-            ? 0
-            : (
-                supply == 0
-                ? balance
-                : (balance << 128) / (supply << 128)
-            )
-        );
+        return (balance << 128) / (supply << 128);
     }
 
     function _cost() private view returns (uint256) {
-        return _cost(0);
+        return _cost(0, 0);
     }
 
-    function _cost(uint256 payment) private view returns (uint256) {
-        uint256 value_ = _value(payment);
+    function _cost(uint256 sub) private view returns (uint256) {
+        return _cost(sub, 0);
+    }
+
+    function _cost(uint256 sub, uint256 add) private view returns (uint256) {
+        uint256 value_ = _value(sub, add);
         uint256 b = _blockToken.totalSupply();
         uint256 g = totalSupply();
 
@@ -114,8 +111,8 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function _price(uint256 payment) private view returns (uint256) {
-        uint256 price_ = _value(payment) << 1;
-        uint256 cost_ = _cost(payment) << 1;
+        uint256 price_ = _value(payment, _mintCost * 2);
+        uint256 cost_ = _cost(payment, _mintCost);
 
         return (
             price_ < cost_
@@ -293,10 +290,6 @@ contract HydraGemToken is HydraGemBaseToken {
 
                 } else {
                     _magicToken.mint(minter, 1);
-
-                    if (_coinPaymentTotal[minter] >= _mintCost) {
-                        _blockToken.mint(block.coinbase, 1);
-                    }
                 }
                 
             } else {
@@ -318,10 +311,6 @@ contract HydraGemToken is HydraGemBaseToken {
     
                 } else {
                     _magicToken.mint(minter, 1);
-    
-                    if (_mintPaymentTotal[minter] >= _mintCost) {
-                        _blockToken.mint(block.coinbase, 1);
-                    }
                 }
                 
             }

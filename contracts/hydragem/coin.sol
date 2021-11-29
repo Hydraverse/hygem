@@ -6,7 +6,7 @@ import "./base.sol";
 
 contract HydraGemCoinToken is HydraGemBaseToken {
 
-    uint8 _decimals_ = 5;
+    uint8 _decimals_ = 6;
 
     constructor(HydraGemBaseToken gemToken_, address owner_) HydraGemBaseToken(unicode"🪙 GCOIN", unicode"🪙", gemToken_, owner_) {
     }
