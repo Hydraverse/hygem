@@ -82,7 +82,7 @@ contract HydraGemToken is HydraGemBaseToken {
         return (
             balance == 0
             ? 0
-            : (balance << 128) / (supply << 128))
+            : (balance << 64) / (supply << 64))
         ;
     }
 
@@ -99,9 +99,9 @@ contract HydraGemToken is HydraGemBaseToken {
         uint256 b = _blockToken.totalSupply();
         uint256 g = totalSupply();
 
-        value_ <<= 127; b <<= 128; g <<= 128;
+        value_ <<= 63; b <<= 64; g <<= 64;
 
-        value_ = (value_ - ((1 + value_ * b) / (1 + b + g))) >> 128;
+        value_ = (value_ - ((1 + value_ * b) / (1 + b + g))) >> 64;
 
         return (value_ < _mintCost) ? _mintCost : value_;
     }

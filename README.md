@@ -36,11 +36,11 @@ Use `sendtocontract` to access all below functions, and `callcontract` for views
 Replace `ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU` with your own address or leave blank to use the default address.
 
 ```shell
-$ GEM=80c1e004a6605035924787b85d7f73be52c5214a
+$ GEM=0375ac54ae06f82e493e0c7064d623381fe48402
 $ ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU
 $ hydra-cli -testnet sendtocontract $GEM 1249c58b 0.11 350000 $ADDR  # mint()
 {
-  "txid": "ce562485df35b38c2cfe9277af20072087db151cdc2c4ed111b3e48ae1387589",
+  "txid": "07d28c047379aa2499274bc4da65128cd5b009d4a4c13a9e5a5e54a9ceb8c797",
   "sender": "Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU",
   "hash160": "ca253ac9875464ddfb30f498c9e0e64bab7c6360"
 }
@@ -186,7 +186,7 @@ Transaction: [5237e3ed6fa8e5fcaf75b7c6d08cb78d83b8c7237da6fd3514e48dec0f744e50](
 
 # Function Details
 
-### Main Contract: [💎 HYGEM 💎HydraGem💎 [v9.3a-test]](https://testexplorer.hydrachain.org/contract/f57944a55d1d95cb2fab513171f2230e68931f7b/) `f57944a55d1d95cb2fab513171f2230e68931f7b`
+### Main Contract: [💎 HYGEM 💎HydraGem💎 [v9.3g-test]](https://testexplorer.hydrachain.org/contract/0375ac54ae06f82e493e0c7064d623381fe48402/) `0375ac54ae06f82e493e0c7064d623381fe48402`
 
 ### Functions
 
