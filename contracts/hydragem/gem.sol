@@ -25,7 +25,7 @@ contract HydraGemToken is HydraGemBaseToken {
         _blockToken = new HydraGemBlockToken(this, owner());
         _coinToken = new HydraGemCoinToken(this, owner());
         _flameToken = new HydraGemFlameToken(_coinToken, owner());
-        _mintCost = 10 ** 6 / 1000;
+        _mintCost = 10 ** 6;
     }
 
     function magicToken() public view returns (HydraGemMagicToken) {
@@ -69,15 +69,13 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function _value(uint256 sub, uint256 add) private view returns (uint256) {
-        uint256 balance = address(this).balance;
-        uint256 coinBalance = _coinToken.balanceOf(address(this));
+        uint256 balance = totalBalance();
         uint256 supply = 1 + ((totalSupply() + _blockToken.totalSupply()) >> 1);
 
         require(sub <= balance, unicode"💎: [_value] payment cannot exceed total balance");
 
         balance -= sub;
         balance += add;
-        balance += coinBalance;
 
         return balance / supply;
     }
@@ -92,10 +90,15 @@ contract HydraGemToken is HydraGemBaseToken {
 
     function _cost(uint256 sub, uint256 add) private view returns (uint256) {
         uint256 value_ = _value(sub, add);
+
         uint256 b = _blockToken.totalSupply() << 1;
         uint256 g = totalSupply() << 1;
 
-        value_ = (value_ - ((1 + value_ * b) / (1 + b + g))) >> 1;
+        uint256 s = (1 + value_ * b) / (1 + b + g);
+
+        require(s <= value_, "value division state error");
+
+        value_ = (value_ - s) >> 1;
 
         return (value_ < _mintCost) ? _mintCost : value_;
     }
