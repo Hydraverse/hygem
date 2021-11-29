@@ -53,15 +53,15 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function cost() public view returns (uint256) {
-        return _cost();
+        return _cost(0);
     }
 
     function value() public view returns (uint256) {
-        return _value();
+        return _value(0);
     }
 
     function price() public view returns (uint256) {
-        return _price();
+        return _price(0);
     }
 
     function _value() private view returns (uint256) {
@@ -85,7 +85,7 @@ contract HydraGemToken is HydraGemBaseToken {
             : (
                 supply == 0
                 ? balance
-                : (((balance << 128) / (supply << 128)) >> 128)
+                : (balance << 128) / (supply << 128)
             )
         );
     }
@@ -181,15 +181,8 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function _coins(address to, uint256 amount) private {
-
         if (amount > 0) {
-            _withdraw(address(_coinToken), amount);
-
-            uint256 coinAmount = _coinToken.balanceOf(address(this));
-
-            require(coinAmount >= amount, unicode"💎: Could not properly acquire 🪙 liquidity");
-
-            _coinToken.transferInternal(address(this), to, amount);
+            _coinToken.buy{value:amount}(to);
         }
     }
 

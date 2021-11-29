@@ -20,11 +20,11 @@ contract HydraGemCoinToken is HydraGemBaseToken {
     }
 
     receive() external payable virtual override {
-        return buy(_msgSender());
+        return buy(address(0));
     }
 
     function buy() public payable {
-        return buy(_msgSender());
+        return buy(address(0));
     }
 
     function buy(address recipient) public payable {
