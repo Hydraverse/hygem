@@ -79,11 +79,7 @@ contract HydraGemToken is HydraGemBaseToken {
         balance += add;
         balance += coinBalance;
 
-        return (
-            balance == 0
-            ? 0
-            : (balance << 64) / (supply << 64))
-        ;
+        return balance / supply;
     }
 
     function _cost() private view returns (uint256) {
@@ -96,12 +92,10 @@ contract HydraGemToken is HydraGemBaseToken {
 
     function _cost(uint256 sub, uint256 add) private view returns (uint256) {
         uint256 value_ = _value(sub, add);
-        uint256 b = _blockToken.totalSupply();
-        uint256 g = totalSupply();
+        uint256 b = _blockToken.totalSupply() << 1;
+        uint256 g = totalSupply() << 1;
 
-        value_ <<= 63; b <<= 64; g <<= 64;
-
-        value_ = (value_ - ((1 + value_ * b) / (1 + b + g))) >> 64;
+        value_ = (value_ - ((1 + value_ * b) / (1 + b + g))) >> 1;
 
         return (value_ < _mintCost) ? _mintCost : value_;
     }

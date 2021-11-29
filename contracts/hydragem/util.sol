@@ -4,6 +4,7 @@ pragma solidity >=0.5.4;
 import "../../openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "../../openzeppelin/contracts/access/Ownable.sol";
 import "../../openzeppelin/contracts/utils/Address.sol";
+import "../../openzeppelin/contracts/utils/math/SafeMath.sol";
 
 
 abstract contract ERC20SimpleTrackedBurner is ERC20 {
