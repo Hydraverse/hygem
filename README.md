@@ -36,17 +36,17 @@ Use `sendtocontract` to access all below functions, and `callcontract` for views
 Replace `ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU` with your own address or leave blank to use the default address.
 
 ```shell
-$ GEM=dd550f833ead8507cda24e6fe737de0b04deae7e
+$ GEM=48f2daacca83a7cdeb59cf251a791fe8894be1cc
 $ ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU
 $ hydra-cli -testnet sendtocontract $GEM 1249c58b 0.11 350000 $ADDR  # mint()
 {
-  "txid": "d83990b9873b138c86844b9797daca51b9e48a5722e0d93523d19bd1ad1585c9",
+  "txid": "ee08e352eb547d372a38ab7878998498204f880bf46dc5be51059e9485c1d69d",
   "sender": "Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU",
   "hash160": "ca253ac9875464ddfb30f498c9e0e64bab7c6360"
 }
 ```
 Any amount of HYDRA beyond the mint cost is returned to the sender.
-The transaction can be located on the [Testnet Explorer](https://testexplorer.hydrachain.org/tx/d83990b9873b138c86844b9797daca51b9e48a5722e0d93523d19bd1ad1585c9)
+The transaction can be located on the [Testnet Explorer](https://testexplorer.hydrachain.org/tx/ee08e352eb547d372a38ab7878998498204f880bf46dc5be51059e9485c1d69d)
 to determine the 🧱 winner. 
 
 ### Example of buying one 🧱 from another holder at the queried price:
@@ -56,22 +56,22 @@ On testnet, that holder is pretty much always the most prolific miner at `TvuuV8
 ```shell
 $ hydra-cli -testnet callcontract $GEM a035b1fe # price()
 {
-  "address": "f57944a55d1d95cb2fab513171f2230e68931f7b",
+  "address": "48f2daacca83a7cdeb59cf251a791fe8894be1cc",
   "executionResult": {
     ...
-    "output": "000000000000000000000000000000000000000000000000000000000002781c",
+    "output": "000000000000000000000000000000000000000000000000000000000007a120",
     ...
   },
   ...
 }
 
-python3 -c 'print(0x2781c / 10**8)'
-0.0016182
+python3 -c 'print(0x7a120 / 10**8)'
+0.5
 
 $ hydra-cli -testnet gethexaddress TvuuV8G8S3dstJ6C75WJLPKboiA4qX8zNv
 ecfdca6aced679c041241de8d12a90779f3dc71a
 
-$ hydra-cli -testnet sendtocontract $GEM f088d547000000000000000000000000ecfdca6aced679c041241de8d12a90779f3dc71a 0.1 250000 $ADDR  # buy()
+$ hydra-cli -testnet sendtocontract $GEM f088d547000000000000000000000000ecfdca6aced679c041241de8d12a90779f3dc71a 0 250000 $ADDR  # buy()
 {
   "txid": "9095a2aee45fb9e98be4cc96f72aac43ecaad50c808cf6902d546c9099e6a3a4",
   "sender": "Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU",

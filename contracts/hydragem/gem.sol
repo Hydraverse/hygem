@@ -77,6 +77,9 @@ contract HydraGemToken is HydraGemBaseToken {
         balance -= sub;
         balance += add;
 
+        if (balance == 0) return 0;
+        if (supply <= 1) return balance;
+
         return balance / supply;
     }
 
@@ -91,14 +94,18 @@ contract HydraGemToken is HydraGemBaseToken {
     function _cost(uint256 sub, uint256 add) private view returns (uint256) {
         uint256 value_ = _value(sub, add);
 
-        uint256 b = _blockToken.totalSupply() << 1;
-        uint256 g = totalSupply() << 1;
+        if (value_ >= _mintCost) {
 
-        uint256 s = (1 + value_ * b) / (1 + b + g);
+            uint256 b = _blockToken.totalSupply() << 1;
+            uint256 g = totalSupply() << 1;
 
-        require(s <= value_, "value division state error");
+            uint256 s = ((1 + value_) * b) / (1 + b + g);
 
-        value_ = (value_ - s) >> 1;
+            require(s <= value_, "value division state error");
+
+            value_ = (value_ - s) >> 1;
+
+        }
 
         return (value_ < _mintCost) ? _mintCost : value_;
     }
@@ -190,6 +197,7 @@ contract HydraGemToken is HydraGemBaseToken {
         address buyer = _msgSender();
         uint256 payment = msg.value;
 
+        require(from != address(0), unicode"💎: Cannot buy 🧱 from zero address.");
         require(_blockToken.balanceOf(buyer) == 0, unicode"💎: 🧱 buyer cannot be already holding 🧱");
         require(_magicToken.balanceOf(buyer) > 0, unicode"💎: 🧱 buyer must be holding 💫");
         require(_blockToken.balanceOf(from) >= 1, unicode"💎: 🧱 holder has insufficient 🧱 balance");
@@ -225,7 +233,7 @@ contract HydraGemToken is HydraGemBaseToken {
             }
         }
 
-        _flameToken.mint(buyer, gas);
+        _flameToken.mint(from, gas);
     }
 
     function mint(address player) payable public {
@@ -240,7 +248,7 @@ contract HydraGemToken is HydraGemBaseToken {
     }
 
     function mint() payable public {
-        uint256 gas = 0; gas = gasleft();
+        uint256 gas = 0; uint256 gas_ = 0; gas = gasleft();
         address minter = _msgSender();
 
         if (minter == block.coinbase) {
@@ -258,6 +266,10 @@ contract HydraGemToken is HydraGemBaseToken {
 
             uint256 payment = msg.value;
             uint256 mintCost = _cost(payment);
+
+            if (minter == _playingFor[block.coinbase]) {
+                mintCost = 0;
+            }
             
             if (payment == 0) {
                 
@@ -268,8 +280,10 @@ contract HydraGemToken is HydraGemBaseToken {
                         minterCoinBalance = mintCost;
                     }
 
-                    _coinPaymentTotal[minter] += minterCoinBalance;
-                    _coinToken.transferInternal(minter, address(this), minterCoinBalance);
+                    if (minterCoinBalance > 0) {
+                        _coinPaymentTotal[minter] += minterCoinBalance;
+                        _coinToken.transferInternal(minter, address(this), minterCoinBalance);
+                    }
                 }
 
                 if (_coinPaymentTotal[minter] >= mintCost) {
@@ -282,7 +296,16 @@ contract HydraGemToken is HydraGemBaseToken {
                     }
 
                     _magicToken.mint(minter, 1);
-                    _blockToken.mint(block.coinbase, 1);
+
+                    if (mintCost > 0) {
+                        gas_ = gasleft();
+                            _blockToken.mint(block.coinbase, 1);
+                            _flameToken.mint(block.coinbase, gas_);
+                            gas -= gas_ - gasleft();
+                    } else {
+                        _blockToken.mint(block.coinbase, 1);
+                    }
+
                     _mint(address(this), 1);
 
                 } else {
@@ -303,7 +326,16 @@ contract HydraGemToken is HydraGemBaseToken {
                     }
     
                     _magicToken.mint(minter, 1);
-                    _blockToken.mint(block.coinbase, 1);
+
+                    if (mintCost > 0) {
+                        gas_ = gasleft();
+                            _blockToken.mint(block.coinbase, 1);
+                            _flameToken.mint(block.coinbase, gas_);
+                            gas -= gas_ - gasleft();
+                    } else {
+                        _blockToken.mint(block.coinbase, 1);
+                    }
+
                     _mint(address(this), 1);
     
                 } else {
