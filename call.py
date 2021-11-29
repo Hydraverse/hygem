@@ -32,7 +32,7 @@ def format_param(param: str):
     return param.rjust(64, "0")
 
 
-def format_number_param(number: (int, float), decimals: int = 5):
+def format_number_param(number: (int, float), decimals: int = 6):
     return format_param(
         hex(
             int(number * 10**decimals) if isinstance(number, float)
