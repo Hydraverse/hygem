@@ -6,11 +6,11 @@ Mint free "magic" tokens by interacting with a smart contract on the blockchain,
 then combine with found & bought "blocks" to make gems having real HYDRA value!
 
 This game consists of five tokens:
-- `💫 MAGIC` Awarded to players looking for and minting BLOCK🧱.
-- `🧱 BLOCK` Awarded to HYDRA block miners when players mint MAGIC💫.
-- `💎 HYGEM` Awarded to players when combining and burning MAGIC💫 + BLOCK🧱.
-- `🪙 GCOIN` Game payment token with a 100:1 HYDRA redemption value (1 GCOIN🪙 = 0.01 HYDRA).
-- `🔥 FLAME` Awarded to players and HYDRA block miners based on the amount of _gas_ used by the blockchain to pay for gameplay.
+- `💫 MAGIC:` Awarded to players looking for and minting BLOCK🧱.
+- `🧱 BLOCK:` Awarded to HYDRA block miners when players mint MAGIC💫.
+- `💎 HYGEM:` Awarded to players when combining and burning MAGIC💫 + BLOCK🧱.
+- `🪙 GCOIN:` Game payment token with a 100:1 HYDRA redemption value (1 GCOIN🪙 = 0.01 HYDRA).
+- `🔥 FLAME:` Awarded to players and HYDRA block miners based on the amount of _gas_ used by the blockchain to pay for gameplay.
 
 The goal of this game is to acquire and hold HYGEMs until they are redeemable for a value higher than the minting cost.
 
