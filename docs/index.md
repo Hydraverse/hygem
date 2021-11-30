@@ -37,15 +37,15 @@ This allows players to hold HYGEM until the redemption value is to their liking.
 
 Note that HYGEM cannot be burned until the player has burned all available MAGIC+BLOCK pairs from their holdings.
 
-# Gameplay from `hydra-cli`
+# Gameplay from hydra-cli
 
 Use `sendtocontract` to access all below functions, and `callcontract` for views.
 
 ## Mint MAGIC💫
 
 This transaction sends 0.11 HYDRA to the game contract.
-The initial cost of minting starts at 1 GEMCOIN, which as a value of 0.01 HYDRA.
-Minting costs are refunded as GEMCOIN, so the following transaction refunds 10🪙 to be used for future minting.
+The initial cost of minting starts at 1 G(EM)COIN, which has a value of 0.01 HYDRA.
+Minting costs are refunded as GCOIN, so the following transaction refunds 10🪙 to be used for future minting.
 
 Replace `ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU` with your own address or leave blank to use the default address.
 

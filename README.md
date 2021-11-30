@@ -37,15 +37,15 @@ This allows players to hold HYGEM until the redemption value is to their liking.
 
 Note that HYGEM cannot be burned until the player has burned all available MAGIC+BLOCK pairs from their holdings.
 
-# Gameplay from `hydra-cli`
+# Gameplay from hydra-cli
 
 Use `sendtocontract` to access all below functions, and `callcontract` for views.
 
 ## Mint MAGIC💫
 
 This transaction sends 0.11 HYDRA to the game contract.
-The initial cost of minting starts at 1 GEMCOIN, which as a value of 0.01 HYDRA.
-Minting costs are refunded as GEMCOIN, so the following transaction refunds 10🪙 to be used for future minting.
+The initial cost of minting starts at 1 G(EM)COIN, which has a value of 0.01 HYDRA.
+Minting costs are refunded as GCOIN, so the following transaction refunds 10🪙 to be used for future minting.
 
 Replace `ADDR=Tsjf5gGi3kJnCTfkn9ACKb3rHELVdAc8JU` with your own address or leave blank to use the default address.
 
@@ -61,7 +61,7 @@ $ hydra-cli -testnet sendtocontract $GEM 1249c58b 0.11 350000 $ADDR  # mint()
 ```
 Any amount of HYDRA beyond the mint cost is returned to the sender.
 The transaction can be located on the [Testnet Explorer](https://testexplorer.hydrachain.org/tx/407fa9ac62c5b40eea640a4ad2889a654204d55a2fb19a056b0212ff4c051643)
-to determine the BLOCK🧱 winner. 
+to determine the BLOCK🧱 winner.
 
 ## Buy BLOCK🧱
 
@@ -198,62 +198,62 @@ Transaction: [a8b59381681a39fddf0dc7569813d0847065d46480b45aa268103718c622275b](
 
 - ### `1249c58b` `mint()`
 
-    Mint 1 MAGIC to the caller, and 1 BLOCK to `block.coinbase`,
-    otherwise known as the miner of the block that confirmed the current transaction.
-    If the caller is also the miner, half of the current HYDRA reward pool is paid out
-    instead.
+  Mint 1 MAGIC to the caller, and 1 BLOCK to `block.coinbase`,
+  otherwise known as the miner of the block that confirmed the current transaction.
+  If the caller is also the miner, half of the current HYDRA reward pool is paid out
+  instead.
 
-    A minimum payment is required for BLOCK to be minted, but MAGIC is still minted when no payment is included or the amount paid is less than the `cost`.
-    If the payment is less than the amount specified by the `cost()` function, the amount is held by the contract until additional payments meet the minimum `cost`.
-    Any excess beyond the `cost` is then returned to the sender.
+  A minimum payment is required for BLOCK to be minted, but MAGIC is still minted when no payment is included or the amount paid is less than the `cost`.
+  If the payment is less than the amount specified by the `cost()` function, the amount is held by the contract until additional payments meet the minimum `cost`.
+  Any excess beyond the `cost` is then returned to the sender.
 
-    If there is no payment included but the caller is holding GCOIN, they will be used to pay the minting cost instead.
+  If there is no payment included but the caller is holding GCOIN, they will be used to pay the minting cost instead.
 
 - ### `6a627842` `mint(address)`
 
-    Mint 1 MAGIC to the caller, and identify `address` as a "co-player" who is able to retrieve blocks from the calling address without a required payment.
+  Mint 1 MAGIC to the caller, and identify `address` as a "co-player" who is able to retrieve blocks from the calling address without a required payment.
 
-    The purpose of this functionality is to allow staking wallets to not be disturbed in order to maximize the likelihood of mining a HYDRA block.
+  The purpose of this functionality is to allow staking wallets to not be disturbed in order to maximize the likelihood of mining a HYDRA block.
 
-    No payment is required, and the caller will still receive 1💫, effectively locking out anyone else besides the co-player from buying minted BLOCKs.
+  No payment is required, and the caller will still receive 1💫, effectively locking out anyone else besides the co-player from buying minted BLOCKs.
 
 - ### `44df8e70` `burn()`
 
-    This function's behavior depends on the caller's token holdings.
+  This function's behavior depends on the caller's token holdings.
 
-    If the caller holds both MAGIC and BLOCK, one of each is burned,
-    and the caller is awarded with 1 HYGEM.
+  If the caller holds both MAGIC and BLOCK, one of each is burned,
+  and the caller is awarded with 1 HYGEM.
 
-    Otherwise, if the caller has any HYGEMs, one gets burned and a proportion of the
-    HYDRA reward pool is paid out to the caller as GCOINs.
-    
-    The current award value can be determined from the `value()` function.
+  Otherwise, if the caller has any HYGEMs, one gets burned and a proportion of the
+  HYDRA reward pool is paid out to the caller as GCOINs.
+
+  The current award value can be determined from the `value()` function.
 
 - ### `f088d547` `buy(address)`
   ### `a6f2ae3a` `buy()`
 
-    Buy 1 BLOCK from `address` (or `block.coinbase` of the current transaction) for at least `price()` HYDRA included as payment.
+  Buy 1 BLOCK from `address` (or `block.coinbase` of the current transaction) for at least `price()` HYDRA included as payment.
 
-    Conditions must be met in order for the purchase to be allowed:
-     - The buyer cannot be holding BLOCK.
-     - The buyer must be holding MAGIC.
-     - The BLOCK holder at `address` must not be holding MAGIC.
+  Conditions must be met in order for the purchase to be allowed:
+  - The buyer cannot be holding BLOCK.
+  - The buyer must be holding MAGIC.
+  - The BLOCK holder at `address` must not be holding MAGIC.
 
-    Once these conditions are met, the HYDRA payment is sent to the reward pool
-    and the BLOCK is transferred from the holder at `address` to the caller.
+  Once these conditions are met, the HYDRA payment is sent to the reward pool
+  and the BLOCK is transferred from the holder at `address` to the caller.
 
-    If no payment is included but the caller holds GCOIN, they will be used to cover the buy price instead.
+  If no payment is included but the caller holds GCOIN, they will be used to cover the buy price instead.
 
 - ### `be040fb0` `redeem()`
   ### `db006a75` `redeem(amount)`
 
-    Redeem `amount` (or all) of held GCOIN🪙 for HYDRA, where 1🪙 = 0.01 HYDRA.
+  Redeem `amount` (or all) of held GCOIN🪙 for HYDRA, where 1🪙 = 0.01 HYDRA.
 
-    The purpose of this token is to provide permanence to the game's reward history,
-    enable gameplay with tokens only, and are otherwise usable as normal tokens (which serves as collateral for HYDRA).
+  The purpose of this token is to provide permanence to the game's reward history,
+  enable gameplay with tokens only, and are otherwise usable as normal tokens (which serves as collateral for HYDRA).
 
-    They can be bought directly using the `coins()` function, traded on the DEX, and transferred.
-    However, unlike normal tokens these cannot be burned.
+  They can be bought directly using the `coins()` function, traded on the DEX, and transferred.
+  However, unlike normal tokens these cannot be burned.
 
 - ### `13faede6` `cost()`
 
@@ -263,15 +263,15 @@ Transaction: [a8b59381681a39fddf0dc7569813d0847065d46480b45aa268103718c622275b](
 
 - ### `a035b1fe` `price()`
 
-    Get the current GCOIN price to buy BLOCK, based on total supply in combination with HYGEM.
+  Get the current GCOIN price to buy BLOCK, based on total supply in combination with HYGEM.
 
 - ### `3fa4f245` `value()`
 
-    Get the current GCOIN reward value from burning one HYGEM.
+  Get the current GCOIN reward value from burning one HYGEM.
 
 - ### `22fcefbe` `coins()`
 
-    Return GCOIN🪙 from paid HYDRA, with 1🪙 = 0.001 HYDRA.
+  Return GCOIN🪙 from paid HYDRA, with 1🪙 = 0.001 HYDRA.
 
 ## Generic Functions for All Contracts
 
