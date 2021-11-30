@@ -11,6 +11,6 @@ issuehunt: # Replace with a single IssueHunt username
 otechie: # Replace with a single Otechie username
 custom: # Replace with up to 4 custom sponsorship URLs e.g., ['link1', 'link2']
 
-custom: ['https://www.paypal.com/donate/?hosted_button_id=MYKWPQCWBVK6J', 'hydra:HGTejfY1vkSdbqitvuLSXtw9qgzEBi7Pqy']
+custom: ['https://www.paypal.com/donate/?hosted_button_id=MYKWPQCWBVK6J', 'https://explorer.hydrachain.org/address/HGTejfY1vkSdbqitvuLSXtw9qgzEBi7Pqy']
 github: hydendra
 ko_fi: halospace
