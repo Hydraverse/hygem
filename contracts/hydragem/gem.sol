@@ -72,7 +72,7 @@ contract HydraGemToken is HydraGemBaseToken {
         uint256 balance = totalBalance();
         uint256 supply = 1 + ((totalSupply() + _blockToken.totalSupply()) >> 1);
 
-        require(sub <= balance, unicode"💎: [_value] payment cannot exceed total balance");
+        require(sub <= address(this).balance, unicode"💎: [_value] payment cannot exceed total balance");
 
         balance -= sub;
         balance += add;
