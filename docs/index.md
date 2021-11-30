@@ -6,11 +6,14 @@ Mint free "magic" tokens by interacting with a smart contract on the blockchain,
 then combine with found & bought "blocks" to make gems having real HYDRA value!
 
 This game consists of five tokens:
-- `💫 MAGIC:` Awarded to players looking for and minting BLOCK🧱.
-- `🧱 BLOCK:` Awarded to HYDRA block miners when players mint MAGIC💫.
-- `💎 HYGEM:` Awarded to players when combining and burning MAGIC💫 + BLOCK🧱.
-- `🪙 GCOIN:` Game payment token with a 100:1 HYDRA redemption value (1 GCOIN🪙 = 0.01 HYDRA).
-- `🔥 FLAME:` Awarded to players and HYDRA block miners based on the amount of _gas_ used by the blockchain to pay for gameplay.
+
+| ID | Name | Description |
+|------------|------|-------------|
+| `💫` | `MAGIC` | Awarded to players looking for and minting BLOCK🧱 | 
+| `🧱` | `BLOCK` | Awarded to HYDRA staking wallets when players mint MAGIC💫 |
+| `💎` | `HYGEM` | Awarded when combining and burning MAGIC💫 + BLOCK🧱 |
+| `🪙` | `GCOIN` | Game payment token (1 GCOIN🪙 = 0.01 HYDRA) |
+| `🔥` | `FLAME` | Transaction _gas_ token, value determined by creator refunds. |
 
 The goal of this game is to acquire and hold HYGEMs until they are redeemable for a value higher than the minting cost.
 
@@ -235,9 +238,9 @@ Transaction: [a8b59381681a39fddf0dc7569813d0847065d46480b45aa268103718c622275b](
   Buy 1 BLOCK from `address` (or `block.coinbase` of the current transaction) for at least `price()` HYDRA included as payment.
 
   Conditions must be met in order for the purchase to be allowed:
-    - The buyer cannot be holding BLOCK.
-    - The buyer must be holding MAGIC.
-    - The BLOCK holder at `address` must not be holding MAGIC.
+  - The buyer cannot be holding BLOCK.
+  - The buyer must be holding MAGIC.
+  - The BLOCK holder at `address` must not be holding MAGIC.
 
   Once these conditions are met, the HYDRA payment is sent to the reward pool
   and the BLOCK is transferred from the holder at `address` to the caller.
