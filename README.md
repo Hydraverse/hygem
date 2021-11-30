@@ -1,4 +1,4 @@
-# HydraGem Mining Game
+# Hydragem
 ****
 ### The HYDRA Blockchain Game
 
@@ -14,12 +14,12 @@ This game consists of five tokens:
 
 The goal of this game is to acquire and hold HYGEMs until they are redeemable for a value higher than the minting cost.
 
-HYGEMs can be acquired for free by mining BLOCKs from player-owned wallets, or bought from BLOCK holders not participating in
+HYGEMs can be acquired for free by mining BLOCKs from player-owned staking wallets, or bought from BLOCK holders not participating in
 the game (not holding MAGIC).
 
 ### How it works:
 
-Every smart contract transaction on the Hydra chain is confirmed by a mined block.
+Every smart contract transaction on the Hydra chain is confirmed by a mined block, which is also what generates our coveted HYDRA staking rewards.
 
 When a player mints MAGIC, the cost (starting at 0.01 HYDRA, or 1 GCOIN) is contributed to the HYDRA reward pool.
 At the same time, the address responsible for mining the HYDRA block associated with this transaction receives 1 BLOCK.
