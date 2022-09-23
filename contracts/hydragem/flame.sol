@@ -125,7 +125,7 @@ contract HydraGemFlameToken is HydraGemBaseToken {
 
             if (coinBalance > 0) {
                 burnFrom(redeemer, coinBalance);
-                _coinToken.transferInternal(address(this), redeemer, coinBalance);
+                _coinToken.transferFrom(address(this), redeemer, coinBalance);
                 amountPayable -= coinBalance;
                 coinBalance = _coinToken.balanceOf(address(this));
             }
